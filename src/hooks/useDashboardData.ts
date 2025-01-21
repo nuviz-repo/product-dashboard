@@ -7,8 +7,14 @@ interface DateRange {
 }
 
 export const useDashboardData = (dateRange?: DateRange) => {
+  console.log("DEBUG dateRange: ", dateRange)
+
   const fetchMetrics = async () => {
     // Query sessions filtered by date range and join with interactions and interaction_products
+    // const data = await supabase.from("sessions").select().eq("id", "1eec97ff-9bfa-4541-982e-2ed2f2d54adf")
+    // console.log("New Query", data)
+
+
     const { data: result, error } = await supabase
       .from('sessions')
       .select(`
@@ -17,6 +23,7 @@ export const useDashboardData = (dateRange?: DateRange) => {
         recording_finished_at,
         interactions (
           id,
+          visualization_flag,
           interaction_products (
             id,
             total_time,
@@ -25,6 +32,12 @@ export const useDashboardData = (dateRange?: DateRange) => {
           )
         )
       `)
+      .gte('recording_started_at', dateRange?.startDate || '')
+      .lte('recording_finished_at', dateRange?.endDate || '');
+
+    const impressions = await supabase
+      .from("impressions")
+      .select()
       .gte('recording_started_at', dateRange?.startDate || '')
       .lte('recording_finished_at', dateRange?.endDate || '');
 
@@ -49,7 +62,7 @@ export const useDashboardData = (dateRange?: DateRange) => {
     const interactions = result?.flatMap(session => session.interactions || []) || [];
     const interactionProducts = interactions.flatMap(interaction => interaction.interaction_products || []);
     
-    const totalInteractions = interactions.length;
+    const visualizationCount = interactions.filter(i => i.visualization_flag).length;
     const takeAwayCount = interactionProducts.filter(ip => ip.take_away).length;
     const putBackCount = interactionProducts.filter(ip => ip.put_back).length;
     
@@ -58,21 +71,14 @@ export const useDashboardData = (dateRange?: DateRange) => {
       time: interaction.interaction_products?.reduce((acc, product) => acc + (product.total_time || 0), 0) || 0,
     }));
 
-    const impressionRate = totalInteractions > 0 
-      ? Math.round((interactionProducts.length / totalInteractions) * 100)
-      : 0;
+    const impressionsCount = impressions.data.reduce((sum, {impressions_count}) => sum + impressions_count, 0)
 
-    console.log('Final metrics:', {
-      totalTime,
-      impressionRate,
-      takeAwayCount,
-      putBackCount,
-      timelineData
-    }); // Debug log for final metrics
+    console.log("Impressions Count", impressionsCount)
 
     return {
       totalTime,
-      impressionRate,
+      impressionsCount,
+      visualizationCount,
       takeAwayCount,
       putBackCount,
       timelineData,

@@ -56,8 +56,8 @@ const Index = () => {
                 className="bg-white/90"
               />
               <MetricCard
-                title="Impression Rate"
-                value={`${data.impressionRate}%`}
+                title="Impressions Count"
+                value={`${data.impressionsCount}`}
                 className="bg-white/90"
               />
               <MetricCard
@@ -82,6 +82,9 @@ const Index = () => {
             <Skeleton className="h-64" />
           ) : data ? (
             <ProductMetrics
+              impressionCount={data.impressionsCount}
+              visualizationCount={data.visualizationCount}
+              interactionCount={data.takeAwayCount + data.putBackCount}
               takeAwayCount={data.takeAwayCount}
               putBackCount={data.putBackCount}
             />
