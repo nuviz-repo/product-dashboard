@@ -40,23 +40,27 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
   const [openCategories, setOpenCategories] = useState(false);
   const [openSkus, setOpenSkus] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
+      setError(null);
       try {
-        const { data, error } = await supabase
+        const { data, error: supabaseError } = await supabase
           .from("products")
           .select("sku_name, brand, category");
         
-        if (error) {
-          console.error("Error fetching products:", error);
+        if (supabaseError) {
+          setError("Error fetching products");
+          console.error("Error fetching products:", supabaseError);
           return;
         }
         
         setProducts(data || []);
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } catch (err) {
+        setError("Error fetching products");
+        console.error("Error fetching products:", err);
       } finally {
         setIsLoading(false);
       }
@@ -77,6 +81,14 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     return (
       <div className="flex items-center justify-center p-4">
         <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 p-4 text-center">
+        {error}
       </div>
     );
   }
