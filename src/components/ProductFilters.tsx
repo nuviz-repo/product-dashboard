@@ -1,19 +1,24 @@
 import { supabase } from "@/lib/supabase";
 import React, { useState, useEffect } from 'react';
-import Select from "react-select";
+import Select, { MultiValue, ActionMeta } from "react-select";
 
 interface ProductFiltersProps {
   onSkuNamesChange: (skuNames: string[]) => void;
 }
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [skuNames, setSkuNames] = useState([]);
+  const [categories, setCategories] = useState<SelectOption[]>([]);
+  const [brands, setBrands] = useState<SelectOption[]>([]);
+  const [skuNames, setSkuNames] = useState<SelectOption[]>([]);
   
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedBrands, setSelectedBrands] = useState([]);
-  const [selectedSkuNames, setSelectedSkuNames] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState<SelectOption[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<SelectOption[]>([]);
+  const [selectedSkuNames, setSelectedSkuNames] = useState<SelectOption[]>([]);
 
   // Fetch categories from Supabase
   useEffect(() => {
@@ -88,10 +93,19 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
     fetchSkuNames();
   }, [selectedCategories, selectedBrands]);
 
-  // Update parent component when selected SKU names change
-  useEffect(() => {
-    onSkuNamesChange(selectedSkuNames.map(option => option.value));
-  }, [selectedSkuNames, onSkuNamesChange]);
+  const handleCategoryChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
+    setSelectedCategories(newValue as SelectOption[]);
+  };
+
+  const handleBrandChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
+    setSelectedBrands(newValue as SelectOption[]);
+  };
+
+  const handleSkuNameChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
+    const newSelectedSkuNames = newValue as SelectOption[];
+    setSelectedSkuNames(newSelectedSkuNames);
+    onSkuNamesChange(newSelectedSkuNames.map(option => option.value));
+  };
 
   return (
     <div>
@@ -102,7 +116,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           isMulti
           options={categories}
           value={selectedCategories}
-          onChange={setSelectedCategories}
+          onChange={handleCategoryChange}
         />
       </div>
       <div>
@@ -112,7 +126,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           isMulti
           options={brands}
           value={selectedBrands}
-          onChange={setSelectedBrands}
+          onChange={handleBrandChange}
           isDisabled={selectedCategories.length === 0}
         />
       </div>
@@ -123,7 +137,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           isMulti
           options={skuNames}
           value={selectedSkuNames}
-          onChange={setSelectedSkuNames}
+          onChange={handleSkuNameChange}
           isDisabled={selectedCategories.length === 0}
         />
       </div>

@@ -6,6 +6,31 @@ interface DateRange {
   endDate?: string;
 }
 
+interface Product {
+  sku_name: string;
+}
+
+interface InteractionProduct {
+  id: number;
+  total_time: number;
+  take_away: boolean;
+  put_back: boolean;
+  product: Product;
+}
+
+interface Interaction {
+  id: number;
+  visualization_flag: boolean;
+  interaction_products: InteractionProduct[];
+}
+
+interface Session {
+  id: number;
+  recording_started_at: string;
+  recording_finished_at: string;
+  interactions: Interaction[];
+}
+
 export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: string[]) => {
   console.log("DEBUG dateRange: ", dateRange)
   console.log("DEBUG selectedSkuNames: ", selectedSkuNames)
@@ -36,26 +61,27 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
 
     const { data: result, error } = await query;
 
+    // For impressions, we'll use the interaction_products table instead
     let impressionsQuery = supabase
-      .from("impressions")
+      .from("interaction_products")
       .select(`
-        *,
+        id,
         product:products (
           sku_name
         )
       `)
-      .gte('recording_started_at', dateRange?.startDate || '')
-      .lte('recording_finished_at', dateRange?.endDate || '');
+      .gte('created_at', dateRange?.startDate || '')
+      .lte('created_at', dateRange?.endDate || '');
 
-    const impressions = await impressionsQuery;
+    const { data: impressionsData, error: impressionsError } = await impressionsQuery;
 
-    if (error) throw error;
+    if (error || impressionsError) throw error || impressionsError;
 
     console.log('Query result:', result);
 
     // Filter results if SKU names are selected
     let filteredResult = result;
-    let filteredImpressions = impressions.data;
+    let filteredImpressions = impressionsData || [];
 
     if (selectedSkuNames && selectedSkuNames.length > 0) {
       filteredResult = result?.filter(session => 
@@ -66,7 +92,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
         )
       ) || [];
 
-      filteredImpressions = impressions.data?.filter(impression =>
+      filteredImpressions = impressionsData?.filter(impression =>
         selectedSkuNames.includes(impression.product?.sku_name)
       ) || [];
     }
@@ -109,7 +135,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
       }, 0) || 0,
     }));
 
-    const impressionsCount = filteredImpressions.reduce((sum, {impressions_count}) => sum + impressions_count, 0);
+    const impressionsCount = filteredImpressions.length;
 
     console.log("Impressions Count", impressionsCount);
 
