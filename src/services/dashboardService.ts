@@ -43,7 +43,7 @@ export const fetchDashboardData = async (dateRange?: { startDate?: string; endDa
         take_away: product.take_away,
         put_back: product.put_back,
         product: {
-          sku_name: product.product?.sku_name
+          sku_name: product.product?.sku_name || ''
         }
       }))
     }))
@@ -72,7 +72,7 @@ export const fetchImpressions = async (dateRange?: { startDate?: string; endDate
   const transformedImpressions = impressionsData?.map(impression => ({
     id: impression.id,
     product: {
-      sku_name: impression.product?.sku_name
+      sku_name: impression.product?.sku_name || ''
     }
   })) as ImpressionProduct[];
 
