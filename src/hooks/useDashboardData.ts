@@ -86,7 +86,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
 
     // Filter results if SKU names are selected
     let filteredResult = result as Session[];
-    let filteredImpressions = (impressionsData || []) as ImpressionProduct[];
+    let filteredImpressions = impressionsData ? (impressionsData as unknown as ImpressionProduct[]) : [];
 
     if (selectedSkuNames && selectedSkuNames.length > 0) {
       filteredResult = (result as Session[])?.filter(session => 
@@ -97,9 +97,11 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
         )
       ) || [];
 
-      filteredImpressions = (impressionsData as ImpressionProduct[])?.filter(impression =>
-        selectedSkuNames.includes(impression.product?.sku_name)
-      ) || [];
+      filteredImpressions = impressionsData ? 
+        (impressionsData as unknown as ImpressionProduct[]).filter(impression =>
+          selectedSkuNames.includes(impression.product?.sku_name)
+        ) 
+        : [];
     }
 
     // Calculate metrics from the filtered data
