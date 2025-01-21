@@ -1,7 +1,7 @@
 import { MetricCard } from "@/components/MetricCard";
 import { TimeChart } from "@/components/TimeChart";
 import { ProductMetrics } from "@/components/ProductMetrics";
-import { ProductFilters } from "@/components/ProductFilters";
+import ProductFilters  from "@/components/ProductFilters";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
