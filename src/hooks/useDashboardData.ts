@@ -1,19 +1,46 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
-export const useDashboardData = () => {
+interface DateRange {
+  startDate?: string;
+  endDate?: string;
+}
+
+export const useDashboardData = (dateRange?: DateRange) => {
   const fetchMetrics = async () => {
-    // First, fetch interactions
+    // First, fetch sessions filtered by date range
+    const sessionsQuery = supabase
+      .from('sessions')
+      .select('id');
+
+    if (dateRange?.startDate) {
+      sessionsQuery.gte('recording_started_at', dateRange.startDate);
+    }
+    if (dateRange?.endDate) {
+      sessionsQuery.lte('recording_finished_at', dateRange.endDate);
+    }
+
+    const { data: sessions, error: sessionsError } = await sessionsQuery;
+
+    if (sessionsError) throw sessionsError;
+
+    // Get session IDs for filtering other tables
+    const sessionIds = sessions?.map(session => session.id) || [];
+
+    // Fetch interactions filtered by session IDs
     const { data: interactions, error: interactionsError } = await supabase
       .from('interactions')
-      .select('*');
+      .select('*')
+      .in('session_id', sessionIds);
 
     if (interactionsError) throw interactionsError;
 
-    // Then, fetch interaction products with the correct table name
+    // Fetch interaction products filtered by the filtered interactions
+    const interactionIds = interactions?.map(interaction => interaction.id) || [];
     const { data: interactionProducts, error: interactionProductsError } = await supabase
       .from('interaction_products')
-      .select('*');
+      .select('*')
+      .in('interaction_id', interactionIds);
 
     if (interactionProductsError) throw interactionProductsError;
 
@@ -53,7 +80,7 @@ export const useDashboardData = () => {
   };
 
   return useQuery({
-    queryKey: ['dashboardData'],
+    queryKey: ['dashboardData', dateRange],
     queryFn: fetchMetrics,
   });
 };

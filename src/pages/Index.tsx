@@ -3,9 +3,23 @@ import { TimeChart } from "@/components/TimeChart";
 import { ProductMetrics } from "@/components/ProductMetrics";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { DatePickerWithRange } from "@/components/DatePickerWithRange";
+import { addDays } from "date-fns";
 
 const Index = () => {
-  const { data, isLoading, error } = useDashboardData();
+  const [date, setDate] = useState<{
+    from: Date;
+    to?: Date;
+  }>({
+    from: new Date(),
+    to: addDays(new Date(), 1),
+  });
+
+  const { data, isLoading, error } = useDashboardData({
+    startDate: date.from?.toISOString(),
+    endDate: date.to?.toISOString(),
+  });
 
   if (error) {
     return (
@@ -22,7 +36,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-[#243949] to-[#517fa4] p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-white mb-8">Product Interaction Dashboard</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-white">Product Interaction Dashboard</h1>
+          <DatePickerWithRange date={date} setDate={setDate} />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {isLoading ? (
