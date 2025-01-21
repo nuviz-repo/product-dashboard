@@ -3,12 +3,19 @@ import { supabase } from '@/lib/supabase';
 
 export const useDashboardData = () => {
   const fetchMetrics = async () => {
-    // Fetch interactions only
+    // First, fetch interactions
     const { data: interactions, error: interactionsError } = await supabase
       .from('interactions')
       .select('*');
 
     if (interactionsError) throw interactionsError;
+
+    // Then, fetch interaction products with the correct table name
+    const { data: interactionProducts, error: interactionProductsError } = await supabase
+      .from('interaction_products')
+      .select('*');
+
+    if (interactionProductsError) throw interactionProductsError;
 
     // Ensure we have data before calculating metrics
     if (!interactions || interactions.length === 0) {
@@ -24,18 +31,16 @@ export const useDashboardData = () => {
     const totalInteractions = interactions.length;
     const totalTime = interactions.reduce((acc, curr) => acc + (curr.visualization?.total_time || 0), 0);
     
-    // Assuming these fields are now part of the interactions table
-    const takeAwayCount = interactions.filter(i => i.take_away).length;
-    const putBackCount = interactions.filter(i => i.put_back).length;
+    const takeAwayCount = interactionProducts?.filter(pi => pi.take_away).length || 0;
+    const putBackCount = interactionProducts?.filter(pi => pi.put_back).length || 0;
     
     const timelineData = interactions.map((interaction, index) => ({
       name: `Interaction ${index + 1}`,
       time: interaction.visualization?.total_time || 0,
     }));
 
-    // Calculate impression rate based on interactions that had any product interaction
     const impressionRate = totalInteractions > 0 
-      ? Math.round(((takeAwayCount + putBackCount) / totalInteractions) * 100)
+      ? Math.round((interactionProducts?.length || 0 / totalInteractions) * 100)
       : 0;
 
     return {
