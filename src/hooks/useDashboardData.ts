@@ -12,6 +12,32 @@ interface ProductFilters {
   skuNames?: string[];
 }
 
+interface Product {
+  sku_name: string;
+  brand: string;
+  category: string;
+}
+
+interface InteractionProduct {
+  id: string;
+  total_time: number;
+  take_away: boolean;
+  put_back: boolean;
+  product: Product;
+}
+
+interface Interaction {
+  id: string;
+  interaction_products: InteractionProduct[];
+}
+
+interface Session {
+  id: string;
+  recording_started_at: string;
+  recording_finished_at: string;
+  interactions: Interaction[];
+}
+
 export const useDashboardData = (dateRange?: DateRange, productFilters?: ProductFilters) => {
   const fetchMetrics = async () => {
     let query = supabase
@@ -45,7 +71,7 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
     console.log('Query result:', result);
 
     // Filter interactions based on product filters
-    const filteredResult = result?.map(session => ({
+    const filteredResult = (result as Session[] || []).map(session => ({
       ...session,
       interactions: session.interactions?.map(interaction => ({
         ...interaction,
@@ -61,7 +87,7 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
     }));
 
     // Calculate metrics from the filtered data
-    const totalTime = filteredResult?.reduce((acc, session) => {
+    const totalTime = filteredResult.reduce((acc, session) => {
       const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
         const interactionTime = interaction.interaction_products?.reduce((productAcc, product) => {
           return productAcc + (product.total_time || 0);
@@ -69,12 +95,12 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
         return interactionAcc + interactionTime;
       }, 0) || 0;
       return acc + sessionTime;
-    }, 0) || 0;
+    }, 0);
 
     console.log('Calculated total time:', totalTime);
 
     // Calculate other metrics
-    const interactions = filteredResult?.flatMap(session => session.interactions || []) || [];
+    const interactions = filteredResult.flatMap(session => session.interactions || []);
     const interactionProducts = interactions.flatMap(interaction => interaction.interaction_products || []);
     
     const takeAwayCount = interactionProducts.filter(ip => ip.take_away).length;

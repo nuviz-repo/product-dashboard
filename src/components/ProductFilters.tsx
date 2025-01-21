@@ -51,7 +51,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
         return;
       }
       
-      setProducts(data as Product[]);
+      setProducts(data || []); // Ensure we always set an array, even if empty
     };
 
     fetchProducts();
@@ -65,23 +65,24 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     });
   }, [selectedBrands, selectedCategories, selectedSkus, onFiltersChange]);
 
-  const uniqueBrands = Array.from(new Set(products.map((p) => p.brand))).filter(Boolean);
+  // Ensure we have products before trying to get unique values
+  const uniqueBrands = products ? Array.from(new Set(products.map((p) => p.brand))).filter(Boolean) : [];
   
-  const filteredCategories = Array.from(
+  const filteredCategories = products ? Array.from(
     new Set(
       products
         .filter((p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
         .map((p) => p.category)
     )
-  ).filter(Boolean);
+  ).filter(Boolean) : [];
 
-  const filteredSkus = products
+  const filteredSkus = products ? products
     .filter(
       (p) =>
         (selectedBrands.length === 0 || selectedBrands.includes(p.brand)) &&
         (selectedCategories.length === 0 || selectedCategories.includes(p.category))
     )
-    .map((p) => p.sku_name);
+    .map((p) => p.sku_name) : [];
 
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
