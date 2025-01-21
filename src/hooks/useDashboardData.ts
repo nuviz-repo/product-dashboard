@@ -6,41 +6,16 @@ interface DateRange {
   endDate?: string;
 }
 
-interface ProductFilters {
-  brands?: string[];
-  categories?: string[];
-  skuNames?: string[];
-}
+export const useDashboardData = (dateRange?: DateRange) => {
+  console.log("DEBUG dateRange: ", dateRange)
 
-interface Product {
-  sku_name: string;
-  brand: string;
-  category: string;
-}
-
-interface InteractionProduct {
-  id: string;
-  total_time: number;
-  take_away: boolean;
-  put_back: boolean;
-  product: Product;
-}
-
-interface Interaction {
-  id: string;
-  interaction_products: InteractionProduct[];
-}
-
-interface Session {
-  id: string;
-  recording_started_at: string;
-  recording_finished_at: string;
-  interactions: Interaction[];
-}
-
-export const useDashboardData = (dateRange?: DateRange, productFilters?: ProductFilters) => {
   const fetchMetrics = async () => {
-    let query = supabase
+    // Query sessions filtered by date range and join with interactions and interaction_products
+    // const data = await supabase.from("sessions").select().eq("id", "1eec97ff-9bfa-4541-982e-2ed2f2d54adf")
+    // console.log("New Query", data)
+
+
+    const { data: result, error } = await supabase
       .from('sessions')
       .select(`
         id,
@@ -48,46 +23,30 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
         recording_finished_at,
         interactions (
           id,
+          visualization_flag,
           interaction_products (
             id,
             total_time,
             take_away,
-            put_back,
-            product:products (
-              sku_name,
-              brand,
-              category
-            )
+            put_back
           )
         )
       `)
       .gte('recording_started_at', dateRange?.startDate || '')
       .lte('recording_finished_at', dateRange?.endDate || '');
 
-    const { data: result, error } = await query;
+    const impressions = await supabase
+      .from("impressions")
+      .select()
+      .gte('recording_started_at', dateRange?.startDate || '')
+      .lte('recording_finished_at', dateRange?.endDate || '');
 
     if (error) throw error;
 
-    console.log('Query result:', result);
+    console.log('Query result:', result); // Debug log to see the data structure
 
-    // Filter interactions based on product filters
-    const filteredResult = (result as Session[] || []).map(session => ({
-      ...session,
-      interactions: session.interactions?.map(interaction => ({
-        ...interaction,
-        interaction_products: interaction.interaction_products?.filter(ip => {
-          const product = ip.product;
-          return (
-            (!productFilters?.brands?.length || productFilters.brands.includes(product.brand)) &&
-            (!productFilters?.categories?.length || productFilters.categories.includes(product.category)) &&
-            (!productFilters?.skuNames?.length || productFilters.skuNames.includes(product.sku_name))
-          );
-        })
-      }))
-    }));
-
-    // Calculate metrics from the filtered data
-    const totalTime = filteredResult.reduce((acc, session) => {
+    // Calculate metrics from the joined data
+    const totalTime = result?.reduce((acc, session) => {
       const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
         const interactionTime = interaction.interaction_products?.reduce((productAcc, product) => {
           return productAcc + (product.total_time || 0);
@@ -95,14 +54,15 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
         return interactionAcc + interactionTime;
       }, 0) || 0;
       return acc + sessionTime;
-    }, 0);
+    }, 0) || 0;
 
-    console.log('Calculated total time:', totalTime);
+    console.log('Calculated total time:', totalTime); // Debug log for total time calculation
 
     // Calculate other metrics
-    const interactions = filteredResult.flatMap(session => session.interactions || []);
+    const interactions = result?.flatMap(session => session.interactions || []) || [];
     const interactionProducts = interactions.flatMap(interaction => interaction.interaction_products || []);
     
+    const visualizationCount = interactions.filter(i => i.visualization_flag).length;
     const takeAwayCount = interactionProducts.filter(ip => ip.take_away).length;
     const putBackCount = interactionProducts.filter(ip => ip.put_back).length;
     
@@ -111,26 +71,14 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
       time: interaction.interaction_products?.reduce((acc, product) => acc + (product.total_time || 0), 0) || 0,
     }));
 
-    const { data: impressions } = await supabase
-      .from("impressions")
-      .select()
-      .gte('recording_started_at', dateRange?.startDate || '')
-      .lte('recording_finished_at', dateRange?.endDate || '');
+    const impressionsCount = impressions.data.reduce((sum, {impressions_count}) => sum + impressions_count, 0)
 
-    const impressionsCount = impressions?.reduce((sum, {impressions_count}) => sum + impressions_count, 0) || 0;
-
-    console.log('Final metrics:', {
-      totalTime,
-      impressionsCount,
-      takeAwayCount,
-      putBackCount,
-      timelineData
-    });
+    console.log("Impressions Count", impressionsCount)
 
     return {
       totalTime,
       impressionsCount,
-      visualizationCount: interactions.length,
+      visualizationCount,
       takeAwayCount,
       putBackCount,
       timelineData,
@@ -138,7 +86,7 @@ export const useDashboardData = (dateRange?: DateRange, productFilters?: Product
   };
 
   return useQuery({
-    queryKey: ['dashboardData', dateRange, productFilters],
+    queryKey: ['dashboardData', dateRange],
     queryFn: fetchMetrics,
   });
 };
