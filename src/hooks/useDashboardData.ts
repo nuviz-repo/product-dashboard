@@ -31,6 +31,11 @@ interface Session {
   interactions: Interaction[];
 }
 
+interface ImpressionProduct {
+  id: number;
+  product: Product;
+}
+
 export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: string[]) => {
   console.log("DEBUG dateRange: ", dateRange)
   console.log("DEBUG selectedSkuNames: ", selectedSkuNames)
@@ -80,11 +85,11 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
     console.log('Query result:', result);
 
     // Filter results if SKU names are selected
-    let filteredResult = result;
-    let filteredImpressions = impressionsData || [];
+    let filteredResult = result as Session[];
+    let filteredImpressions = (impressionsData || []) as ImpressionProduct[];
 
     if (selectedSkuNames && selectedSkuNames.length > 0) {
-      filteredResult = result?.filter(session => 
+      filteredResult = (result as Session[])?.filter(session => 
         session.interactions?.some(interaction =>
           interaction.interaction_products?.some(product =>
             selectedSkuNames.includes(product.product?.sku_name)
@@ -92,7 +97,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
         )
       ) || [];
 
-      filteredImpressions = impressionsData?.filter(impression =>
+      filteredImpressions = (impressionsData as ImpressionProduct[])?.filter(impression =>
         selectedSkuNames.includes(impression.product?.sku_name)
       ) || [];
     }
