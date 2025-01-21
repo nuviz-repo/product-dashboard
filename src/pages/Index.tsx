@@ -1,6 +1,7 @@
 import { MetricCard } from "@/components/MetricCard";
 import { TimeChart } from "@/components/TimeChart";
 import { ProductMetrics } from "@/components/ProductMetrics";
+import { ProductFilters } from "@/components/ProductFilters";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
@@ -16,10 +17,19 @@ const Index = () => {
     to: addDays(new Date(), 1),
   });
 
-  const { data, isLoading, error } = useDashboardData({
-    startDate: date.from?.toISOString(),
-    endDate: date.to?.toISOString(),
+  const [productFilters, setProductFilters] = useState({
+    brands: [],
+    categories: [],
+    skuNames: [],
   });
+
+  const { data, isLoading, error } = useDashboardData(
+    {
+      startDate: date.from?.toISOString(),
+      endDate: date.to?.toISOString(),
+    },
+    productFilters
+  );
 
   if (error) {
     return (
@@ -36,9 +46,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-[#243949] to-[#517fa4] p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center">
           <h1 className="text-3xl font-bold text-white">Product Interaction Dashboard</h1>
-          <DatePickerWithRange date={date} setDate={setDate} />
+          <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+            <DatePickerWithRange date={date} setDate={setDate} />
+          </div>
+        </div>
+
+        <div className="bg-white/90 p-4 rounded-lg shadow">
+          <ProductFilters onFiltersChange={setProductFilters} />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
