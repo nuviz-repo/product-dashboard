@@ -84,12 +84,29 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
 
     console.log('Query result:', result);
 
+    // Transform the data to match our types
+    const transformedResult = result?.map((session: any) => ({
+      ...session,
+      interactions: session.interactions?.map((interaction: any) => ({
+        ...interaction,
+        interaction_products: interaction.interaction_products?.map((product: any) => ({
+          ...product,
+          product: product.product?.[0] || { sku_name: '' } // Take the first product or provide a default
+        }))
+      }))
+    })) as Session[];
+
+    const transformedImpressions = impressionsData?.map((impression: any) => ({
+      ...impression,
+      product: impression.product?.[0] || { sku_name: '' } // Take the first product or provide a default
+    })) as ImpressionProduct[];
+
     // Filter results if SKU names are selected
-    let filteredResult = result as Session[];
-    let filteredImpressions = impressionsData ? (impressionsData as unknown as ImpressionProduct[]) : [];
+    let filteredResult = transformedResult;
+    let filteredImpressions = transformedImpressions;
 
     if (selectedSkuNames && selectedSkuNames.length > 0) {
-      filteredResult = (result as Session[])?.filter(session => 
+      filteredResult = transformedResult?.filter(session => 
         session.interactions?.some(interaction =>
           interaction.interaction_products?.some(product =>
             selectedSkuNames.includes(product.product?.sku_name)
@@ -97,11 +114,9 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
         )
       ) || [];
 
-      filteredImpressions = impressionsData ? 
-        (impressionsData as unknown as ImpressionProduct[]).filter(impression =>
-          selectedSkuNames.includes(impression.product?.sku_name)
-        ) 
-        : [];
+      filteredImpressions = transformedImpressions?.filter(impression =>
+        selectedSkuNames.includes(impression.product?.sku_name)
+      ) || [];
     }
 
     // Calculate metrics from the filtered data
