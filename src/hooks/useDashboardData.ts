@@ -3,14 +3,19 @@ import { supabase } from '@/lib/supabase';
 
 export const useDashboardData = () => {
   const fetchMetrics = async () => {
+    // First, fetch interactions
     const { data: interactions, error: interactionsError } = await supabase
       .from('interactions')
-      .select(`
-        *,
-        product_interactions (*)
-      `);
+      .select('*');
 
     if (interactionsError) throw interactionsError;
+
+    // Then, fetch product interactions separately
+    const { data: productInteractions, error: productInteractionsError } = await supabase
+      .from('product_interactions')
+      .select('*');
+
+    if (productInteractionsError) throw productInteractionsError;
 
     // Ensure we have data before calculating metrics
     if (!interactions || interactions.length === 0) {
@@ -26,9 +31,8 @@ export const useDashboardData = () => {
     const totalInteractions = interactions.length;
     const totalTime = interactions.reduce((acc, curr) => acc + (curr.visualization?.total_time || 0), 0);
     
-    const productInteractions = interactions.flatMap(i => i.product_interactions || []);
-    const takeAwayCount = productInteractions.filter(pi => pi.take_away).length;
-    const putBackCount = productInteractions.filter(pi => pi.put_back).length;
+    const takeAwayCount = productInteractions?.filter(pi => pi.take_away).length || 0;
+    const putBackCount = productInteractions?.filter(pi => pi.put_back).length || 0;
     
     const timelineData = interactions.map((interaction, index) => ({
       name: `Interaction ${index + 1}`,
@@ -36,7 +40,7 @@ export const useDashboardData = () => {
     }));
 
     const impressionRate = totalInteractions > 0 
-      ? Math.round((productInteractions.length / totalInteractions) * 100)
+      ? Math.round((productInteractions?.length || 0 / totalInteractions) * 100)
       : 0;
 
     return {
