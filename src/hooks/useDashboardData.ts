@@ -13,6 +13,8 @@ export const useDashboardData = (dateRange?: DateRange) => {
       .from('sessions')
       .select(`
         id,
+        recording_started_at,
+        recording_finished_at,
         interactions (
           id,
           interaction_products (
@@ -28,6 +30,8 @@ export const useDashboardData = (dateRange?: DateRange) => {
 
     if (error) throw error;
 
+    console.log('Query result:', result); // Debug log to see the data structure
+
     // Calculate metrics from the joined data
     const totalTime = result?.reduce((acc, session) => {
       const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
@@ -38,6 +42,8 @@ export const useDashboardData = (dateRange?: DateRange) => {
       }, 0) || 0;
       return acc + sessionTime;
     }, 0) || 0;
+
+    console.log('Calculated total time:', totalTime); // Debug log for total time calculation
 
     // Calculate other metrics
     const interactions = result?.flatMap(session => session.interactions || []) || [];
@@ -55,6 +61,14 @@ export const useDashboardData = (dateRange?: DateRange) => {
     const impressionRate = totalInteractions > 0 
       ? Math.round((interactionProducts.length / totalInteractions) * 100)
       : 0;
+
+    console.log('Final metrics:', {
+      totalTime,
+      impressionRate,
+      takeAwayCount,
+      putBackCount,
+      timelineData
+    }); // Debug log for final metrics
 
     return {
       totalTime,
