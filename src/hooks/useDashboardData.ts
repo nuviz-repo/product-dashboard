@@ -8,58 +8,41 @@ interface DateRange {
 
 export const useDashboardData = (dateRange?: DateRange) => {
   const fetchMetrics = async () => {
-    // First, fetch sessions filtered by date range
-    const sessionsQuery = supabase
+    // Query sessions filtered by date range and join with interactions and interaction_products
+    const { data: result, error } = await supabase
       .from('sessions')
-      .select('id');
+      .select(`
+        id,
+        interactions (
+          id,
+          visualization->total_time,
+          interaction_products (
+            id,
+            take_away,
+            put_back
+          )
+        )
+      `)
+      .gte('recording_started_at', dateRange?.startDate || '')
+      .lte('recording_finished_at', dateRange?.endDate || '');
 
-    if (dateRange?.startDate) {
-      sessionsQuery.gte('recording_started_at', dateRange.startDate);
-    }
-    if (dateRange?.endDate) {
-      sessionsQuery.lte('recording_finished_at', dateRange.endDate);
-    }
+    if (error) throw error;
 
-    const { data: sessions, error: sessionsError } = await sessionsQuery;
+    // Calculate metrics from the joined data
+    const totalTime = result?.reduce((acc, session) => {
+      const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
+        return interactionAcc + (interaction.visualization?.total_time || 0);
+      }, 0) || 0;
+      return acc + sessionTime;
+    }, 0) || 0;
 
-    if (sessionsError) throw sessionsError;
-
-    // Get session IDs for filtering other tables
-    const sessionIds = sessions?.map(session => session.id) || [];
-
-    // Fetch interactions filtered by session IDs
-    const { data: interactions, error: interactionsError } = await supabase
-      .from('interactions')
-      .select('*')
-      .in('session_id', sessionIds);
-
-    if (interactionsError) throw interactionsError;
-
-    // Fetch interaction products filtered by the filtered interactions
-    const interactionIds = interactions?.map(interaction => interaction.id) || [];
-    const { data: interactionProducts, error: interactionProductsError } = await supabase
-      .from('interaction_products')
-      .select('*')
-      .in('interaction_id', interactionIds);
-
-    if (interactionProductsError) throw interactionProductsError;
-
-    // Ensure we have data before calculating metrics
-    if (!interactions || interactions.length === 0) {
-      return {
-        totalTime: 0,
-        impressionRate: 0,
-        takeAwayCount: 0,
-        putBackCount: 0,
-        timelineData: [],
-      };
-    }
-
-    const totalInteractions = interactions.length;
-    const totalTime = interactions.reduce((acc, curr) => acc + (curr.visualization?.total_time || 0), 0);
+    // Calculate other metrics
+    const interactions = result?.flatMap(session => session.interactions || []) || [];
+    const interactionProducts = interactions.flatMap(interaction => interaction.interaction_products || []);
     
-    const takeAwayCount = interactionProducts?.filter(pi => pi.take_away).length || 0;
-    const putBackCount = interactionProducts?.filter(pi => pi.put_back).length || 0;
+    const totalInteractions = interactions.length;
+    const takeAwayCount = interactionProducts.filter(ip => ip.take_away).length;
+    const putBackCount = interactionProducts.filter(ip => ip.put_back).length;
     
     const timelineData = interactions.map((interaction, index) => ({
       name: `Interaction ${index + 1}`,
@@ -67,7 +50,7 @@ export const useDashboardData = (dateRange?: DateRange) => {
     }));
 
     const impressionRate = totalInteractions > 0 
-      ? Math.round((interactionProducts?.length || 0 / totalInteractions) * 100)
+      ? Math.round((interactionProducts.length / totalInteractions) * 100)
       : 0;
 
     return {
