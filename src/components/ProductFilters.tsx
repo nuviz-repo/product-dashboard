@@ -32,6 +32,7 @@ interface ProductFiltersProps {
 }
 
 export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
+  // Initialize products as empty array instead of undefined
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -57,7 +58,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           return;
         }
         
-        setProducts(data || []);
+        setProducts(data || []); // Ensure we always set an array
       } catch (err) {
         setError("Error fetching products");
         console.error("Error fetching products:", err);
@@ -77,6 +78,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     });
   }, [selectedBrands, selectedCategories, selectedSkus, onFiltersChange]);
 
+  // Enhanced loading state handling
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -93,47 +95,48 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     );
   }
 
-  const uniqueBrands = Array.from(new Set(products?.map((p) => p.brand) || [])).filter(Boolean);
+  // Ensure we have arrays with proper null checks
+  const uniqueBrands = Array.from(new Set(products.map((p) => p.brand))).filter(Boolean);
   
   const filteredCategories = Array.from(
     new Set(
       products
-        ?.filter((p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
-        ?.map((p) => p.category) || []
+        .filter((p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
+        .map((p) => p.category)
     )
   ).filter(Boolean);
 
   const filteredSkus = Array.from(
     new Set(
       products
-        ?.filter(
+        .filter(
           (p) =>
             (selectedBrands.length === 0 || selectedBrands.includes(p.brand)) &&
             (selectedCategories.length === 0 || selectedCategories.includes(p.category))
         )
-        ?.map((p) => p.sku_name) || []
+        .map((p) => p.sku_name)
     )
   ).filter(Boolean);
 
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
       {/* Brands Filter */}
-      <Popover open={openBrands} onOpenChange={setOpenBrands}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={openBrands}
-            className="justify-between"
-          >
-            {selectedBrands.length === 0
-              ? "Select brands"
-              : `${selectedBrands.length} selected`}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          {uniqueBrands.length > 0 ? (
+      {uniqueBrands.length > 0 && (
+        <Popover open={openBrands} onOpenChange={setOpenBrands}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={openBrands}
+              className="justify-between"
+            >
+              {selectedBrands.length === 0
+                ? "Select brands"
+                : `${selectedBrands.length} selected`}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
             <Command>
               <CommandInput placeholder="Search brands..." />
               <CommandEmpty>No brand found.</CommandEmpty>
@@ -161,27 +164,27 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
                 ))}
               </CommandGroup>
             </Command>
-          ) : null}
-        </PopoverContent>
-      </Popover>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Categories Filter */}
-      <Popover open={openCategories} onOpenChange={setOpenCategories}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={openCategories}
-            className="justify-between"
-          >
-            {selectedCategories.length === 0
-              ? "Select categories"
-              : `${selectedCategories.length} selected`}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          {filteredCategories.length > 0 ? (
+      {filteredCategories.length > 0 && (
+        <Popover open={openCategories} onOpenChange={setOpenCategories}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={openCategories}
+              className="justify-between"
+            >
+              {selectedCategories.length === 0
+                ? "Select categories"
+                : `${selectedCategories.length} selected`}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
             <Command>
               <CommandInput placeholder="Search categories..." />
               <CommandEmpty>No category found.</CommandEmpty>
@@ -209,27 +212,27 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
                 ))}
               </CommandGroup>
             </Command>
-          ) : null}
-        </PopoverContent>
-      </Popover>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* SKUs Filter */}
-      <Popover open={openSkus} onOpenChange={setOpenSkus}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={openSkus}
-            className="justify-between"
-          >
-            {selectedSkus.length === 0
-              ? "Select SKUs"
-              : `${selectedSkus.length} selected`}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
-          {filteredSkus.length > 0 ? (
+      {filteredSkus.length > 0 && (
+        <Popover open={openSkus} onOpenChange={setOpenSkus}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={openSkus}
+              className="justify-between"
+            >
+              {selectedSkus.length === 0
+                ? "Select SKUs"
+                : `${selectedSkus.length} selected`}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
             <Command>
               <CommandInput placeholder="Search SKUs..." />
               <CommandEmpty>No SKU found.</CommandEmpty>
@@ -257,9 +260,9 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
                 ))}
               </CommandGroup>
             </Command>
-          ) : null}
-        </PopoverContent>
-      </Popover>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {/* Selected Filters Display */}
       <div className="flex flex-wrap gap-2">
