@@ -12,6 +12,17 @@ export const useDashboardData = () => {
 
     if (interactionsError) throw interactionsError;
 
+    // Ensure we have data before calculating metrics
+    if (!interactions || interactions.length === 0) {
+      return {
+        totalTime: 0,
+        impressionRate: 0,
+        takeAwayCount: 0,
+        putBackCount: 0,
+        timelineData: [],
+      };
+    }
+
     const totalInteractions = interactions.length;
     const totalTime = interactions.reduce((acc, curr) => acc + (curr.visualization?.total_time || 0), 0);
     
@@ -24,7 +35,9 @@ export const useDashboardData = () => {
       time: interaction.visualization?.total_time || 0,
     }));
 
-    const impressionRate = Math.round((productInteractions.length / totalInteractions) * 100);
+    const impressionRate = totalInteractions > 0 
+      ? Math.round((productInteractions.length / totalInteractions) * 100)
+      : 0;
 
     return {
       totalTime,

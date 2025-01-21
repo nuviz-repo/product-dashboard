@@ -31,7 +31,7 @@ const Index = () => {
               <Skeleton className="h-32" />
               <Skeleton className="h-32" />
             </>
-          ) : (
+          ) : data ? (
             <>
               <MetricCard
                 title="Total Interaction Time"
@@ -49,26 +49,26 @@ const Index = () => {
                 className="bg-white/90"
               />
             </>
-          )}
+          ) : null}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {isLoading ? (
             <Skeleton className="h-[400px] col-span-4" />
-          ) : (
+          ) : data ? (
             <TimeChart data={data.timelineData} />
-          )}
+          ) : null}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {isLoading ? (
             <Skeleton className="h-64" />
-          ) : (
+          ) : data ? (
             <ProductMetrics
               takeAwayCount={data.takeAwayCount}
               putBackCount={data.putBackCount}
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
