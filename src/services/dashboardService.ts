@@ -29,7 +29,27 @@ export const fetchDashboardData = async (dateRange?: { startDate?: string; endDa
 
   if (error) throw error;
 
-  return result as Session[];
+  // Transform the data to match our Session type
+  const transformedResult = result?.map(session => ({
+    id: session.id,
+    recording_started_at: session.recording_started_at,
+    recording_finished_at: session.recording_finished_at,
+    interactions: session.interactions?.map(interaction => ({
+      id: interaction.id,
+      visualization_flag: interaction.visualization_flag,
+      interaction_products: interaction.interaction_products?.map(product => ({
+        id: product.id,
+        total_time: product.total_time,
+        take_away: product.take_away,
+        put_back: product.put_back,
+        product: {
+          sku_name: product.product?.sku_name
+        }
+      }))
+    }))
+  })) as Session[];
+
+  return transformedResult;
 };
 
 export const fetchImpressions = async (dateRange?: { startDate?: string; endDate?: string }) => {
@@ -48,5 +68,13 @@ export const fetchImpressions = async (dateRange?: { startDate?: string; endDate
 
   if (error) throw error;
 
-  return impressionsData as unknown as ImpressionProduct[];
+  // Transform the data to match our ImpressionProduct type
+  const transformedImpressions = impressionsData?.map(impression => ({
+    id: impression.id,
+    product: {
+      sku_name: impression.product?.sku_name
+    }
+  })) as ImpressionProduct[];
+
+  return transformedImpressions;
 };
