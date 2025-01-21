@@ -1,24 +1,16 @@
 import { supabase } from "@/lib/supabase";
 import React, { useState, useEffect } from 'react';
-import Select, { MultiValue, ActionMeta } from "react-select";
-
-interface ProductFiltersProps {
-  onSkuNamesChange: (skuNames: string[]) => void;
-}
-
-interface SelectOption {
-  value: string;
-  label: string;
-}
-
-const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
-  const [categories, setCategories] = useState<SelectOption[]>([]);
-  const [brands, setBrands] = useState<SelectOption[]>([]);
-  const [skuNames, setSkuNames] = useState<SelectOption[]>([]);
   
-  const [selectedCategories, setSelectedCategories] = useState<SelectOption[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<SelectOption[]>([]);
-  const [selectedSkuNames, setSelectedSkuNames] = useState<SelectOption[]>([]);
+import Select from "react-select";
+
+const ProductFilters = () => {
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [skuNames, setSkuNames] = useState([]);
+  
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedSkuNames, setSelectedSkuNames] = useState([]);
 
   // Fetch categories from Supabase
   useEffect(() => {
@@ -93,20 +85,6 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
     fetchSkuNames();
   }, [selectedCategories, selectedBrands]);
 
-  const handleCategoryChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
-    setSelectedCategories(newValue as SelectOption[]);
-  };
-
-  const handleBrandChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
-    setSelectedBrands(newValue as SelectOption[]);
-  };
-
-  const handleSkuNameChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
-    const newSelectedSkuNames = newValue as SelectOption[];
-    setSelectedSkuNames(newSelectedSkuNames);
-    onSkuNamesChange(newSelectedSkuNames.map(option => option.value));
-  };
-
   return (
     <div>
       <div>
@@ -116,7 +94,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           isMulti
           options={categories}
           value={selectedCategories}
-          onChange={handleCategoryChange}
+          onChange={setSelectedCategories}
         />
       </div>
       <div>
@@ -126,7 +104,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           isMulti
           options={brands}
           value={selectedBrands}
-          onChange={handleBrandChange}
+          onChange={setSelectedBrands}
           isDisabled={selectedCategories.length === 0}
         />
       </div>
@@ -137,7 +115,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           isMulti
           options={skuNames}
           value={selectedSkuNames}
-          onChange={handleSkuNameChange}
+          onChange={setSelectedSkuNames}
           isDisabled={selectedCategories.length === 0}
         />
       </div>
