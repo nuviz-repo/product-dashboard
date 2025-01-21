@@ -1,6 +1,7 @@
 import { MetricCard } from "@/components/MetricCard";
 import { TimeChart } from "@/components/TimeChart";
 import { ProductMetrics } from "@/components/ProductMetrics";
+import { ProductFilters } from "@/components/ProductFilters";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
@@ -40,6 +41,8 @@ const Index = () => {
           <h1 className="text-3xl font-bold text-white">Product Interaction Dashboard</h1>
           <DatePickerWithRange date={date} setDate={setDate} />
         </div>
+
+        <ProductFilters />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {isLoading ? (
