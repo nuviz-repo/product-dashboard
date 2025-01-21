@@ -17,10 +17,12 @@ const Index = () => {
     to: addDays(new Date(), 1),
   });
 
+  const [selectedSkuNames, setSelectedSkuNames] = useState<string[]>([]);
+
   const { data, isLoading, error } = useDashboardData({
     startDate: date.from?.toISOString(),
     endDate: date.to?.toISOString(),
-  });
+  }, selectedSkuNames);
 
   if (error) {
     return (
@@ -42,7 +44,7 @@ const Index = () => {
           <DatePickerWithRange date={date} setDate={setDate} />
         </div>
 
-        <ProductFilters />
+        <ProductFilters onSkuNamesChange={setSelectedSkuNames} />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {isLoading ? (

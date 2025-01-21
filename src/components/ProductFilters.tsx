@@ -1,9 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import React, { useState, useEffect } from 'react';
-  
 import Select from "react-select";
 
-const ProductFilters = () => {
+interface ProductFiltersProps {
+  onSkuNamesChange: (skuNames: string[]) => void;
+}
+
+const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [skuNames, setSkuNames] = useState([]);
@@ -84,6 +87,11 @@ const ProductFilters = () => {
 
     fetchSkuNames();
   }, [selectedCategories, selectedBrands]);
+
+  // Update parent component when selected SKU names change
+  useEffect(() => {
+    onSkuNamesChange(selectedSkuNames.map(option => option.value));
+  }, [selectedSkuNames, onSkuNamesChange]);
 
   return (
     <div>
