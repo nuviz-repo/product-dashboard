@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,19 +39,27 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
   const [openBrands, setOpenBrands] = useState(false);
   const [openCategories, setOpenCategories] = useState(false);
   const [openSkus, setOpenSkus] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("sku_name, brand, category");
-      
-      if (error) {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("sku_name, brand, category");
+        
+        if (error) {
+          console.error("Error fetching products:", error);
+          return;
+        }
+        
+        setProducts(data || []);
+      } catch (error) {
         console.error("Error fetching products:", error);
-        return;
+      } finally {
+        setIsLoading(false);
       }
-      
-      setProducts(data || []); // Ensure we always set an array, even if empty
     };
 
     fetchProducts();
@@ -65,24 +73,31 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     });
   }, [selectedBrands, selectedCategories, selectedSkus, onFiltersChange]);
 
-  // Ensure we have products before trying to get unique values
-  const uniqueBrands = products ? Array.from(new Set(products.map((p) => p.brand))).filter(Boolean) : [];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  const uniqueBrands = Array.from(new Set(products.map((p) => p.brand))).filter(Boolean);
   
-  const filteredCategories = products ? Array.from(
+  const filteredCategories = Array.from(
     new Set(
       products
         .filter((p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
         .map((p) => p.category)
     )
-  ).filter(Boolean) : [];
+  ).filter(Boolean);
 
-  const filteredSkus = products ? products
+  const filteredSkus = products
     .filter(
       (p) =>
         (selectedBrands.length === 0 || selectedBrands.includes(p.brand)) &&
         (selectedCategories.length === 0 || selectedCategories.includes(p.category))
     )
-    .map((p) => p.sku_name) : [];
+    .map((p) => p.sku_name);
 
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
