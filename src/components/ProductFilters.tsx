@@ -93,23 +93,23 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     );
   }
 
-  const uniqueBrands = Array.from(new Set(products.map((p) => p.brand))).filter(Boolean);
+  const uniqueBrands = Array.from(new Set(products?.map((p) => p.brand) || [])).filter(Boolean);
   
   const filteredCategories = Array.from(
     new Set(
       products
-        .filter((p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
-        .map((p) => p.category)
+        ?.filter((p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
+        ?.map((p) => p.category) || []
     )
   ).filter(Boolean);
 
-  const filteredSkus = products
-    .filter(
+  const filteredSkus = (products
+    ?.filter(
       (p) =>
         (selectedBrands.length === 0 || selectedBrands.includes(p.brand)) &&
         (selectedCategories.length === 0 || selectedCategories.includes(p.category))
     )
-    .map((p) => p.sku_name);
+    ?.map((p) => p.sku_name) || []).filter(Boolean);
 
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
@@ -129,33 +129,35 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Search brands..." />
-            <CommandEmpty>No brand found.</CommandEmpty>
-            <CommandGroup>
-              {uniqueBrands.map((brand) => (
-                <CommandItem
-                  key={brand}
-                  onSelect={() => {
-                    setSelectedBrands((prev) =>
-                      prev.includes(brand)
-                        ? prev.filter((b) => b !== brand)
-                        : [...prev, brand]
-                    );
-                    setOpenBrands(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedBrands.includes(brand) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {brand}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+          {uniqueBrands.length > 0 && (
+            <Command>
+              <CommandInput placeholder="Search brands..." />
+              <CommandEmpty>No brand found.</CommandEmpty>
+              <CommandGroup>
+                {uniqueBrands.map((brand) => (
+                  <CommandItem
+                    key={brand}
+                    onSelect={() => {
+                      setSelectedBrands((prev) =>
+                        prev.includes(brand)
+                          ? prev.filter((b) => b !== brand)
+                          : [...prev, brand]
+                      );
+                      setOpenBrands(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedBrands.includes(brand) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {brand}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          )}
         </PopoverContent>
       </Popover>
 
@@ -175,33 +177,35 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Search categories..." />
-            <CommandEmpty>No category found.</CommandEmpty>
-            <CommandGroup>
-              {filteredCategories.map((category) => (
-                <CommandItem
-                  key={category}
-                  onSelect={() => {
-                    setSelectedCategories((prev) =>
-                      prev.includes(category)
-                        ? prev.filter((c) => c !== category)
-                        : [...prev, category]
-                    );
-                    setOpenCategories(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedCategories.includes(category) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {category}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+          {filteredCategories.length > 0 && (
+            <Command>
+              <CommandInput placeholder="Search categories..." />
+              <CommandEmpty>No category found.</CommandEmpty>
+              <CommandGroup>
+                {filteredCategories.map((category) => (
+                  <CommandItem
+                    key={category}
+                    onSelect={() => {
+                      setSelectedCategories((prev) =>
+                        prev.includes(category)
+                          ? prev.filter((c) => c !== category)
+                          : [...prev, category]
+                      );
+                      setOpenCategories(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedCategories.includes(category) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {category}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          )}
         </PopoverContent>
       </Popover>
 
@@ -221,33 +225,35 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          <Command>
-            <CommandInput placeholder="Search SKUs..." />
-            <CommandEmpty>No SKU found.</CommandEmpty>
-            <CommandGroup>
-              {filteredSkus.map((sku) => (
-                <CommandItem
-                  key={sku}
-                  onSelect={() => {
-                    setSelectedSkus((prev) =>
-                      prev.includes(sku)
-                        ? prev.filter((s) => s !== sku)
-                        : [...prev, sku]
-                    );
-                    setOpenSkus(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedSkus.includes(sku) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {sku}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+          {filteredSkus.length > 0 && (
+            <Command>
+              <CommandInput placeholder="Search SKUs..." />
+              <CommandEmpty>No SKU found.</CommandEmpty>
+              <CommandGroup>
+                {filteredSkus.map((sku) => (
+                  <CommandItem
+                    key={sku}
+                    onSelect={() => {
+                      setSelectedSkus((prev) =>
+                        prev.includes(sku)
+                          ? prev.filter((s) => s !== sku)
+                          : [...prev, sku]
+                      );
+                      setOpenSkus(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedSkus.includes(sku) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {sku}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          )}
         </PopoverContent>
       </Popover>
 
