@@ -103,13 +103,17 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
     )
   ).filter(Boolean);
 
-  const filteredSkus = (products
-    ?.filter(
-      (p) =>
-        (selectedBrands.length === 0 || selectedBrands.includes(p.brand)) &&
-        (selectedCategories.length === 0 || selectedCategories.includes(p.category))
+  const filteredSkus = Array.from(
+    new Set(
+      products
+        ?.filter(
+          (p) =>
+            (selectedBrands.length === 0 || selectedBrands.includes(p.brand)) &&
+            (selectedCategories.length === 0 || selectedCategories.includes(p.category))
+        )
+        ?.map((p) => p.sku_name) || []
     )
-    ?.map((p) => p.sku_name) || []).filter(Boolean);
+  ).filter(Boolean);
 
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
@@ -129,7 +133,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          {uniqueBrands.length > 0 && (
+          {uniqueBrands.length > 0 ? (
             <Command>
               <CommandInput placeholder="Search brands..." />
               <CommandEmpty>No brand found.</CommandEmpty>
@@ -157,7 +161,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
                 ))}
               </CommandGroup>
             </Command>
-          )}
+          ) : null}
         </PopoverContent>
       </Popover>
 
@@ -177,7 +181,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          {filteredCategories.length > 0 && (
+          {filteredCategories.length > 0 ? (
             <Command>
               <CommandInput placeholder="Search categories..." />
               <CommandEmpty>No category found.</CommandEmpty>
@@ -205,7 +209,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
                 ))}
               </CommandGroup>
             </Command>
-          )}
+          ) : null}
         </PopoverContent>
       </Popover>
 
@@ -225,7 +229,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
-          {filteredSkus.length > 0 && (
+          {filteredSkus.length > 0 ? (
             <Command>
               <CommandInput placeholder="Search SKUs..." />
               <CommandEmpty>No SKU found.</CommandEmpty>
@@ -253,7 +257,7 @@ export function ProductFilters({ onFiltersChange }: ProductFiltersProps) {
                 ))}
               </CommandGroup>
             </Command>
-          )}
+          ) : null}
         </PopoverContent>
       </Popover>
 
