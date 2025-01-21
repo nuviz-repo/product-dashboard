@@ -15,9 +15,9 @@ export const useDashboardData = (dateRange?: DateRange) => {
         id,
         interactions (
           id,
-          total_time,
           interaction_products (
             id,
+            total_time,
             take_away,
             put_back
           )
@@ -31,7 +31,10 @@ export const useDashboardData = (dateRange?: DateRange) => {
     // Calculate metrics from the joined data
     const totalTime = result?.reduce((acc, session) => {
       const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
-        return interactionAcc + (interaction.total_time || 0);
+        const interactionTime = interaction.interaction_products?.reduce((productAcc, product) => {
+          return productAcc + (product.total_time || 0);
+        }, 0) || 0;
+        return interactionAcc + interactionTime;
       }, 0) || 0;
       return acc + sessionTime;
     }, 0) || 0;
@@ -46,7 +49,7 @@ export const useDashboardData = (dateRange?: DateRange) => {
     
     const timelineData = interactions.map((interaction, index) => ({
       name: `Interaction ${index + 1}`,
-      time: interaction.total_time || 0,
+      time: interaction.interaction_products?.reduce((acc, product) => acc + (product.total_time || 0), 0) || 0,
     }));
 
     const impressionRate = totalInteractions > 0 
