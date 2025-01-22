@@ -17,12 +17,10 @@ const Index = () => {
     to: addDays(new Date(), 1),
   });
 
-  const [selectedSkuNames, setSelectedSkuNames] = useState<string[]>([]);
-
   const { data, isLoading, error } = useDashboardData({
     startDate: date.from?.toISOString(),
     endDate: date.to?.toISOString(),
-  }, selectedSkuNames);
+  });
 
   console.log("Error", error)
   console.log("Is Loading", isLoading)
@@ -89,7 +87,7 @@ const Index = () => {
           <DatePickerWithRange date={date} setDate={setDate} />
         </div>
 
-        <ProductFilters onSkuNamesChange={setSelectedSkuNames} />
+        <ProductFilters />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {isLoading ? (

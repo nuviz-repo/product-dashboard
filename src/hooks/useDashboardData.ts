@@ -39,7 +39,12 @@ interface ProductInteractionDisplay {
 
 export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: string[]) => {
   const fetchMetrics = async () => {
-    let query = supabase
+    // Query sessions filtered by date range and join with interactions and interaction_products
+    // const data = await supabase.from("sessions").select().eq("id", "1eec97ff-9bfa-4541-982e-2ed2f2d54adf")
+    // console.log("New Query", data)
+
+
+    const { data: result, error } = await supabase
       .from('sessions')
       .select(`
         id,
@@ -52,15 +57,13 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
             id,
             total_time,
             take_away,
-            put_back,
-            product:products (
-              sku_name
-            )
+            put_back
           )
         )
       `)
       .gte('recording_started_at', dateRange?.startDate || '')
       .lte('recording_finished_at', dateRange?.endDate || '');
+
 
     let productsInteractionDisplay = await supabase.rpc('get_interaction_data', {
       sku_names: selectedSkuNames,
@@ -92,14 +95,11 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
       ) || [];
     }
 
-    // Calculate metrics from the filtered data
-    const totalTime = filteredResult?.reduce((acc, session) => {
+    // Calculate metrics from the joined data
+    const totalTime = result?.reduce((acc, session) => {
       const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
         const interactionTime = interaction.interaction_products?.reduce((productAcc, product) => {
-          if (!selectedSkuNames?.length || selectedSkuNames.includes(product.product?.sku_name)) {
-            return productAcc + (product.total_time || 0);
-          }
-          return productAcc;
+          return productAcc + (product.total_time || 0);
         }, 0) || 0;
         return interactionAcc + interactionTime;
       }, 0) || 0;
@@ -120,12 +120,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
     
     const timelineData = interactions.map((interaction, index) => ({
       name: `Interaction ${index + 1}`,
-      time: interaction.interaction_products?.reduce((acc, product) => {
-        if (!selectedSkuNames?.length || selectedSkuNames.includes(product.product?.sku_name)) {
-          return acc + (product.total_time || 0);
-        }
-        return acc;
-      }, 0) || 0,
+      time: interaction.interaction_products?.reduce((acc, product) => acc + (product.total_time || 0), 0) || 0,
     }));
 
     const impressionsCount = impressions.data.reduce((sum, {impressions_count}) => sum + impressions_count, 0)
@@ -142,7 +137,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
   };
 
   return useQuery({
-    queryKey: ['dashboardData', dateRange, selectedSkuNames],
+    queryKey: ['dashboardData', dateRange],
     queryFn: fetchMetrics,
   });
 };
