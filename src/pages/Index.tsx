@@ -24,12 +24,9 @@ const Index = () => {
     endDate: date.to?.toISOString(),
   }, selectedSkuNames);
 
-  console.log("Error", error)
-  console.log("Is Loading", isLoading)
-
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-[#243949] to-[#517fa4] p-8">
+      <div className="min-h-screen bg-[#dedfda] p-8" style={{ border: `2px solid #070707` }}>
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             Error loading dashboard data
@@ -39,53 +36,27 @@ const Index = () => {
     );
   }
 
-  console.log("Data Product", data?.products)
-
-  const mockData = [
-    { interaction_time: "2025-01-20T08:00:00Z", product: "Product A", interactions: 10 },
-    { interaction_time: "2025-01-20T09:00:00Z", product: "Product A", interactions: 15 },
-    { interaction_time: "2025-01-20T10:00:00Z", product: "Product A", interactions: 12 },
-    { interaction_time: "2025-01-20T11:00:00Z", product: "Product A", interactions: 8 },
-    { interaction_time: "2025-01-20T12:00:00Z", product: "Product A", interactions: 20 },
-    { interaction_time: "2025-01-20T08:00:00Z", product: "Product B", interactions: 5 },
-    { interaction_time: "2025-01-20T09:00:00Z", product: "Product B", interactions: 7 },
-    { interaction_time: "2025-01-20T10:00:00Z", product: "Product B", interactions: 14 },
-    { interaction_time: "2025-01-20T11:00:00Z", product: "Product B", interactions: 18 },
-    { interaction_time: "2025-01-20T12:00:00Z", product: "Product B", interactions: 11 },
-    { interaction_time: "2025-01-20T08:00:00Z", product: "Product C", interactions: 8 },
-    { interaction_time: "2025-01-20T09:00:00Z", product: "Product C", interactions: 6 },
-    { interaction_time: "2025-01-20T10:00:00Z", product: "Product C", interactions: 9 },
-    { interaction_time: "2025-01-20T11:00:00Z", product: "Product C", interactions: 15 },
-    { interaction_time: "2025-01-20T12:00:00Z", product: "Product C", interactions: 13 },
-    { interaction_time: "2025-01-20T08:00:00Z", product: "Product D", interactions: 4 },
-    { interaction_time: "2025-01-20T09:00:00Z", product: "Product D", interactions: 9 },
-    { interaction_time: "2025-01-20T10:00:00Z", product: "Product D", interactions: 7 },
-    { interaction_time: "2025-01-20T11:00:00Z", product: "Product D", interactions: 10 },
-    { interaction_time: "2025-01-20T12:00:00Z", product: "Product D", interactions: 12 },
-  ];
-
-  let formattedProductData = [];
-
-  console.log("Data", data)
-  // Convert timestamp to human-readable labels or numeric values
-  formattedProductData = data?.products.map((item) => ({
-    ...item,
-    timestamp: new Date(item.interaction_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  }));
-
-  // console.log("Porra do produto", data.products)
-
-
   const timeRange = {
     start: date.from?.toISOString(),
     end: date.to?.toISOString(),
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-r from-[#243949] to-[#517fa4] p-8">
+    <div 
+      className="min-h-screen bg-[#dedfda] p-8" 
+      style={{ border: `2px solid #070707` }}
+    >
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-5xl font-bold text-white">nuviz</h1>
+          <h1 
+            className="text-[56px] font-bold" 
+            style={{ 
+              fontFamily: "'Pivot Grotesk Regular', sans-serif", 
+              color: '#343dea' 
+            }}
+          >
+            nuviz
+          </h1>
           <div className="flex items-center gap-4">
             <ProductFilters onSkuNamesChange={setSelectedSkuNames} />
             <DatePickerWithRange date={date} setDate={setDate} />
@@ -129,7 +100,7 @@ const Index = () => {
           ) : data ? (
             <>
               <div className="md:col-span-8">
-                <TimeChart data={formattedProductData} timeRange={timeRange} />
+                <TimeChart data={data?.products} timeRange={timeRange} />
               </div>
               <div className="md:col-span-4">
                 <ProductMetrics

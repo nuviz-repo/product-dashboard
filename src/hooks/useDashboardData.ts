@@ -71,7 +71,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
     let products = productsInteractionDisplay.data as unknown as ProductInteractionDisplay[]
 
     const { data: result, error } = await query;
-    // For impressions, we'll use the interaction_products table instead
+
     let impressions = await supabase
       .from("impressions")
       .select()
@@ -127,8 +127,14 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
       }, 0) || 0,
     }));
 
-    const impressionsCount = impressions.data.reduce((sum, {impressions_count}) => sum + impressions_count, 0)
-
+    const filteredImpressions = impressions.data.filter(impression => 
+      impression.products.some(product => 
+          selectedSkuNames.includes(product)
+      )
+    );
+  
+    const impressionsCount = filteredImpressions.reduce((sum, {impressions_count}) => sum + impressions_count, 0);
+    
     return {
       totalTime,
       impressionsCount,

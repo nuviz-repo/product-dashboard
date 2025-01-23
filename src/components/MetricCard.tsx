@@ -12,7 +12,7 @@ export function MetricCard({ title, value, description, className }: MetricCardP
   return (
     <Card className={cn("hover:shadow-lg transition-shadow", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <CardTitle className="text-lg font-nikkei font-bold">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>

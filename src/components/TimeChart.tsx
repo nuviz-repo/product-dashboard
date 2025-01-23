@@ -36,7 +36,7 @@ export function TimeChart({ data, timeRange }: TimeChartProps) {
   return (
     <Card className="h-[400px]">
       <CardHeader>
-        <CardTitle>Interaction Time Timeline</CardTitle>
+        <CardTitle className="text-secondary font-nikkei text-secondary-text">Interaction By Product Timeline</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

@@ -116,7 +116,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
       }
       const query = supabase
         .from("products")
-        .select("sku_name")
+        .select()
         .in("category", selectedCategories.map((c) => c.value));
       if (selectedBrands.length > 0) {
         query.in("brand", selectedBrands.map((b) => b.value));
@@ -126,6 +126,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
         console.error("Error fetching SKU names:", error);
         return;
       }
+
       const uniqueSkuNames = [...new Set(data.map((item) => item.sku_name))];
       setSkuNames(uniqueSkuNames.map((skuName) => ({ value: skuName, label: skuName })));
     };
@@ -142,6 +143,7 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
 
   const handleSkuNameChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
     const newSelectedSkuNames = newValue as SelectOption[];
+    console.log("New Selected SKU names: ", newValue)
     setSelectedSkuNames(newSelectedSkuNames);
     onSkuNamesChange(newSelectedSkuNames.map((option) => option.value));
   };

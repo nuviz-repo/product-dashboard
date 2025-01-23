@@ -21,31 +21,31 @@ export function ProductMetrics({
     {
       label: "Impressions",
       value: impressionCount,
-      color: "bg-blue-500",
+      color: "bg-[#1e1841]",
       percentage: ((impressionCount / total) * 100).toFixed(1)
     },
     {
       label: "Visualizations",
       value: visualizationCount,
-      color: "bg-green-500",
+      color: "bg-[#31368e]",
       percentage: ((visualizationCount / total) * 100).toFixed(1)
     },
     {
       label: "Pick Ups",
       value: interactionCount,
-      color: "bg-yellow-500",
+      color: "bg-[#5f6fff]",
       percentage: ((interactionCount / total) * 100).toFixed(1)
     },
     {
       label: "Take Away",
       value: takeAwayCount,
-      color: "bg-purple-500",
+      color: "bg-[#343dea]",
       percentage: ((takeAwayCount / total) * 100).toFixed(1)
     },
     {
       label: "Put Back",
       value: putBackCount,
-      color: "bg-gray-500",
+      color: "bg-[#8cc0c7]",
       percentage: ((putBackCount / total) * 100).toFixed(1)
     }
   ];
@@ -53,7 +53,7 @@ export function ProductMetrics({
   return (
     <Card className="h-[400px]">
       <CardHeader>
-        <CardTitle>Product Interaction Metrics</CardTitle>
+        <CardTitle className="text-secondary font-nikkei text-secondary-text">Product Interaction Metrics</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {metrics.map((metric) => (

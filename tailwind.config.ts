@@ -18,6 +18,12 @@ export default {
 			}
 		},
 		extend: {
+			fontSize: {
+				'secondary': '18px', // Added secondary text size
+			},
+			fontFamily: {
+				'nikkei': ['"Nikkei Journal Regular"', 'sans-serif'], // Added Nikkei font
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,7 +67,8 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				'secondary-text': '#070707' // Added secondary text color
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
