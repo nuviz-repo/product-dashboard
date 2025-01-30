@@ -1,153 +1,122 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { format } from 'date-fns';
+import {
+  getInteractionProducts,
+  getVisualizationProducts,
+  getImpressionProducts,
+} from '@/services/api';
+import aggregateTimelineDataByDayPeriod from '@/utils/calculateAggregateData';
 
 interface DateRange {
   startDate?: string;
   endDate?: string;
 }
 
-interface Product {
-  sku_name: string;
+interface PeriodStats {
+  count: number;
+  sum: number;
+  avg: number;
+  max: number;
+  min: number;
+  median: number;
+  products: {
+    [key: string]: {
+      count: number;
+      sum: number;
+      avg: number;
+      max: number;
+      min: number;
+      median: number;
+    };
+  };
 }
 
-interface InteractionProduct {
-  id: number;
-  total_time: number;
-  take_away: boolean;
-  put_back: boolean;
-  product: Product;
-}
-
-interface Interaction {
-  id: number;
-  visualization_flag: boolean;
-  interaction_products: InteractionProduct[];
-}
-
-interface Session {
-  id: number;
-  recording_started_at: string;
-  recording_finished_at: string;
-  interactions: Interaction[];
-}
-
-interface ProductInteractionDisplay {
-  interaction_time: string,
-  product: string,
-  interactions: number
+export interface DayPeriodData {
+  [day: string]: {
+    MORNING: PeriodStats;
+    AFTERNOON: PeriodStats;
+    EVENING: PeriodStats;
+  };
 }
 
 export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: string[]) => {
   const fetchMetrics = async () => {
-    let query = supabase
-      .from('sessions')
-      .select(`
-        id,
-        recording_started_at,
-        recording_finished_at,
-        interactions (
-          id,
-          visualization_flag,
-          interaction_products (
-            id,
-            total_time,
-            take_away,
-            put_back,
-            product:products (
-              sku_name
-            )
-          )
-        )
-      `)
-      .gte('recording_started_at', dateRange?.startDate || '')
-      .lte('recording_finished_at', dateRange?.endDate || '');
-
-    let productsInteractionDisplay = await supabase.rpc('get_interaction_data', {
-      sku_names: selectedSkuNames,
-      start_date: dateRange.startDate,
-      end_date: dateRange.endDate
-    });
-
-    let products = productsInteractionDisplay.data as unknown as ProductInteractionDisplay[]
-
-    const { data: result, error } = await query;
-
-    let impressions = await supabase
-      .from("impressions")
-      .select()
-      .gte('recording_started_at', dateRange?.startDate || '')
-      .lte('recording_finished_at', dateRange?.endDate || '');
-
-    // Filter results if SKU names are selected
-    let filteredResult = result as unknown as Session[];
-
-    if (selectedSkuNames && selectedSkuNames.length > 0) {
-      filteredResult = (result as unknown as Session[])?.filter(session => 
-        session.interactions?.some(interaction =>
-          interaction.interaction_products?.some(product =>
-            selectedSkuNames.includes(product.product?.sku_name)
-          )
-        )
-      ) || [];
+    if (!dateRange?.startDate || !dateRange?.endDate) {
+      return null;
     }
 
-    // Calculate metrics from the filtered data
-    const totalTime = filteredResult?.reduce((acc, session) => {
-      const sessionTime = session.interactions?.reduce((interactionAcc, interaction) => {
-        const interactionTime = interaction.interaction_products?.reduce((productAcc, product) => {
-          if (!selectedSkuNames?.length || selectedSkuNames.includes(product.product?.sku_name)) {
-            return productAcc + (product.total_time || 0);
-          }
-          return productAcc;
-        }, 0) || 0;
-        return interactionAcc + interactionTime;
-      }, 0) || 0;
-      return acc + sessionTime;
-    }, 0) || 0;
+    const request = {
+      start_date: format(new Date(dateRange.startDate), 'yyyy-MM-dd'),
+      end_date: format(new Date(dateRange.endDate), 'yyyy-MM-dd'),
+      sku_names: selectedSkuNames || []
+    };
 
-    // Calculate other metrics with SKU filtering
-    const interactions = filteredResult?.flatMap(session => session.interactions || []) || [];
-    const interactionProducts = interactions.flatMap(interaction => 
-      (interaction.interaction_products || []).filter(product => 
-        !selectedSkuNames?.length || selectedSkuNames.includes(product.product?.sku_name)
-      )
-    );
-    
-    const visualizationCount = interactions.filter(i => i.visualization_flag).length;
-    const takeAwayCount = interactionProducts.filter(ip => ip.take_away).length;
-    const putBackCount = interactionProducts.filter(ip => ip.put_back).length;
-    
-    const timelineData = interactions.map((interaction, index) => ({
-      name: `Interaction ${index + 1}`,
-      time: interaction.interaction_products?.reduce((acc, product) => {
-        if (!selectedSkuNames?.length || selectedSkuNames.includes(product.product?.sku_name)) {
-          return acc + (product.total_time || 0);
-        }
-        return acc;
-      }, 0) || 0,
-    }));
+    const [interactions, visualizations, impressions] = await Promise.all([
+      getInteractionProducts(request),
+      getVisualizationProducts(request),
+      getImpressionProducts(request)
+    ]);
 
-    const filteredImpressions = impressions.data.filter(impression => 
-      impression.products.some(product => 
-          selectedSkuNames.includes(product)
-      )
-    );
-  
-    const impressionsCount = filteredImpressions.reduce((sum, {impressions_count}) => sum + impressions_count, 0);
-    
+    // Get pipeline data
+    const takeAwaysCount = interactions.filter(interaction => interaction.take_away).length;
+    const pipelineData = {
+      impressionsCount: impressions.length,
+      visualizationsCount: visualizations.length,
+      interactionsCount: interactions.length,
+      takeAwayCount: takeAwaysCount,
+      putBackCount: interactions.length - takeAwaysCount
+    };
+
+    // Process timeline data
+    const timelineData = {
+      pickUpTimeline: interactions.map(interaction => ({
+        interaction_time: interaction.recording_started_at,
+        product: interaction.sku_name,
+        interactions: interaction.total_time
+      })),
+      takeAwayTimeline: interactions.filter(i => i.take_away).map(interaction => ({
+        interaction_time: interaction.recording_started_at,
+        product: interaction.sku_name,
+        interactions: 1
+      })),
+      putBackTimeline: interactions.filter(i => !i.take_away).map(interaction => ({
+        interaction_time: interaction.recording_started_at,
+        product: interaction.sku_name,
+        interactions: 1
+      })),
+      impressionsTimeline: impressions.map(impression => ({
+        interaction_time: impression.recording_started_at,
+        product: impression.sku_name,
+        interactions: impression.impressions
+      })),
+      visualizationsTimeline: visualizations.map(visualization => ({
+        interaction_time: visualization.recording_started_at,
+        product: visualization.sku_name,
+        interactions: visualization.total_time
+      }))
+    };
+
+    // Aggregate data by day and period
+    const aggregatedData = {
+      pickUps: aggregateTimelineDataByDayPeriod(timelineData.pickUpTimeline),
+      takeAways: aggregateTimelineDataByDayPeriod(timelineData.takeAwayTimeline),
+      putBacks: aggregateTimelineDataByDayPeriod(timelineData.putBackTimeline),
+      impressions: aggregateTimelineDataByDayPeriod(timelineData.impressionsTimeline),
+      visualizations: aggregateTimelineDataByDayPeriod(timelineData.visualizationsTimeline)
+    };
+
+    console.log(aggregatedData)
+
     return {
-      totalTime,
-      impressionsCount,
-      visualizationCount,
-      takeAwayCount,
-      putBackCount,
+      pipelineData,
       timelineData,
-      products
+      aggregatedData
     };
   };
 
   return useQuery({
     queryKey: ['dashboardData', dateRange, selectedSkuNames],
     queryFn: fetchMetrics,
+    enabled: !!dateRange?.startDate && !!dateRange?.endDate
   });
 };

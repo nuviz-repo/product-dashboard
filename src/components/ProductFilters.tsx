@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Select, { MultiValue, ActionMeta, components } from "react-select";
-import { supabase } from "@/lib/supabase";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
+import { getCategories, getBrandsByCategories, getSkuNamesByFilters } from '../services/api';
+import { Button } from "@/components/ui/button";
 
 interface ProductFiltersProps {
   onSkuNamesChange: (skuNames: string[]) => void;
@@ -50,6 +51,12 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
   const [selectedBrands, setSelectedBrands] = useState<SelectOption[]>([]);
   const [selectedSkuNames, setSelectedSkuNames] = useState<SelectOption[]>([]);
 
+  const [isLoading, setIsLoading] = useState({
+    categories: false,
+    brands: false,
+    skuNames: false
+  });
+
   const customStyles = {
     control: (base: any) => ({
       ...base,
@@ -72,17 +79,27 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
     })
   };
 
-  // Fetch categories from Supabase
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data, error } = await supabase.from("products").select("category");
-      if (error) {
+      setIsLoading(prev => ({ ...prev, categories: true }));
+      try {
+        const data = await getCategories();
+        const options = data
+          .filter(category => category && typeof category === 'string')
+          .map(category => ({
+            value: category,
+            label: category
+          }));
+        setCategories(options);
+      } catch (error) {
         console.error("Error fetching categories:", error);
-        return;
+        setCategories([]);
+      } finally {
+        setIsLoading(prev => ({ ...prev, categories: false }));
       }
-      const uniqueCategories = [...new Set(data.map((item) => item.category))];
-      setCategories(uniqueCategories.map((category) => ({ value: category, label: category })));
     };
+
     fetchCategories();
   }, []);
 
@@ -93,17 +110,28 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
         setBrands([]);
         return;
       }
-      const { data, error } = await supabase
-        .from("products")
-        .select("brand")
-        .in("category", selectedCategories.map((c) => c.value));
-      if (error) {
+
+      setIsLoading(prev => ({ ...prev, brands: true }));
+      try {
+        const data = await getBrandsByCategories(
+          selectedCategories.map(c => c.value)
+        );
+        
+        const options = data
+          .filter(brand => brand && typeof brand === 'string')
+          .map(brand => ({
+            value: brand,
+            label: brand
+          }));
+        setBrands(options);
+      } catch (error) {
         console.error("Error fetching brands:", error);
-        return;
+        setBrands([]);
+      } finally {
+        setIsLoading(prev => ({ ...prev, brands: false }));
       }
-      const uniqueBrands = [...new Set(data.map((item) => item.brand))];
-      setBrands(uniqueBrands.map((brand) => ({ value: brand, label: brand })));
     };
+
     fetchBrands();
   }, [selectedCategories]);
 
@@ -114,22 +142,29 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
         setSkuNames([]);
         return;
       }
-      const query = supabase
-        .from("products")
-        .select()
-        .in("category", selectedCategories.map((c) => c.value));
-      if (selectedBrands.length > 0) {
-        query.in("brand", selectedBrands.map((b) => b.value));
-      }
-      const { data, error } = await query;
-      if (error) {
-        console.error("Error fetching SKU names:", error);
-        return;
-      }
 
-      const uniqueSkuNames = [...new Set(data.map((item) => item.sku_name))];
-      setSkuNames(uniqueSkuNames.map((skuName) => ({ value: skuName, label: skuName })));
+      setIsLoading(prev => ({ ...prev, skuNames: true }));
+      try {
+        const data = await getSkuNamesByFilters(
+          selectedCategories.map(c => c.value),
+          selectedBrands.map(b => b.value)
+        );
+        
+        const options = data
+          .filter(skuName => skuName && typeof skuName === 'string')
+          .map(skuName => ({
+            value: skuName,
+            label: skuName
+          }));
+        setSkuNames(options);
+      } catch (error) {
+        console.error("Error fetching SKU names:", error);
+        setSkuNames([]);
+      } finally {
+        setIsLoading(prev => ({ ...prev, skuNames: false }));
+      }
     };
+
     fetchSkuNames();
   }, [selectedCategories, selectedBrands]);
 
@@ -143,13 +178,22 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
 
   const handleSkuNameChange = (newValue: MultiValue<SelectOption>, _: ActionMeta<SelectOption>) => {
     const newSelectedSkuNames = newValue as SelectOption[];
-    console.log("New Selected SKU names: ", newValue)
     setSelectedSkuNames(newSelectedSkuNames);
     onSkuNamesChange(newSelectedSkuNames.map((option) => option.value));
   };
 
+  const handleClearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+    setSelectedSkuNames([]);
+    onSkuNamesChange([]);
+  };
+
+  // Check if any filters are selected
+  const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0 || selectedSkuNames.length > 0;
+
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-center">
       <div className="w-[180px]">
         <Select
           id="category"
@@ -157,10 +201,11 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           options={categories}
           value={selectedCategories}
           onChange={handleCategoryChange}
+          isLoading={isLoading.categories}
           styles={customStyles}
           components={{ Option, ValueContainer }}
           placeholder="Category..."
-          noOptionsMessage={() => "No categories"}
+          noOptionsMessage={() => isLoading.categories ? "Loading..." : "No categories"}
         />
       </div>
       <div className="w-[180px]">
@@ -170,11 +215,12 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           options={brands}
           value={selectedBrands}
           onChange={handleBrandChange}
+          isLoading={isLoading.brands}
           isDisabled={selectedCategories.length === 0}
           styles={customStyles}
           components={{ Option, ValueContainer }}
           placeholder="Brand..."
-          noOptionsMessage={() => "Select category"}
+          noOptionsMessage={() => isLoading.brands ? "Loading..." : "Select category"}
         />
       </div>
       <div className="w-[180px]">
@@ -184,13 +230,25 @@ const ProductFilters = ({ onSkuNamesChange }: ProductFiltersProps) => {
           options={skuNames}
           value={selectedSkuNames}
           onChange={handleSkuNameChange}
+          isLoading={isLoading.skuNames}
           isDisabled={selectedCategories.length === 0}
           styles={customStyles}
           components={{ Option, ValueContainer }}
           placeholder="Product..."
-          noOptionsMessage={() => "Select category"}
+          noOptionsMessage={() => isLoading.skuNames ? "Loading..." : "Select category"}
         />
       </div>
+      {hasActiveFilters && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleClearFilters}
+          className="h-8 px-2 text-gray-500 hover:text-gray-700"
+        >
+          <X className="h-4 w-4 mr-1" />
+          Clear
+        </Button>
+      )}
     </div>
   );
 };

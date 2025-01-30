@@ -1,12 +1,14 @@
-import { MetricCard } from "@/components/MetricCard";
-import { TimeChart } from "@/components/TimeChart";
 import { ProductMetrics } from "@/components/ProductMetrics";
-import ProductFilters  from "@/components/ProductFilters";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import ProductFilters from "@/components/ProductFilters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { DatePickerWithRange } from "@/components/DatePickerWithRange";
 import { addDays } from "date-fns";
+import WeekDataVisualization from "@/components/WeekDataVisualization";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { Accordion } from "@/components/ui/accordion";
+import TimelineSection, { TIMELINE_SECTIONS } from "@/components/TimelineSection";
+import ChatModal from "@/components/ChatModel";
 
 const Index = () => {
   const [date, setDate] = useState<{
@@ -18,6 +20,11 @@ const Index = () => {
   });
 
   const [selectedSkuNames, setSelectedSkuNames] = useState<string[]>([]);
+  
+  // State to track open accordion sections
+  const [openSections, setOpenSections] = useState<string[]>(
+    ["product-interaction"] // Initially the first one is open
+  );
 
   const { data, isLoading, error } = useDashboardData({
     startDate: date.from?.toISOString(),
@@ -62,58 +69,59 @@ const Index = () => {
             <DatePickerWithRange date={date} setDate={setDate} />
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {isLoading ? (
-            <>
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-            </>
-          ) : data ? (
-            <>
-              <MetricCard
-                title="Total Interaction Time"
-                value={`${data.totalTime}s`}
-                className="bg-white/90"
-              />
-              <MetricCard
-                title="Impressions Count"
-                value={`${data.impressionsCount}`}
-                className="bg-white/90"
-              />
-              <MetricCard
-                title="Total Interactions"
-                value={data.takeAwayCount + data.putBackCount}
-                className="bg-white/90"
-              />
-            </>
-          ) : null}
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           {isLoading ? (
             <>
-              <Skeleton className="h-[400px] md:col-span-8" />
               <Skeleton className="h-[400px] md:col-span-4" />
+              <Skeleton className="h-[400px] md:col-span-8" />
             </>
           ) : data ? (
             <>
-              <div className="md:col-span-8">
-                <TimeChart data={data?.products} timeRange={timeRange} />
-              </div>
               <div className="md:col-span-4">
                 <ProductMetrics
-                  impressionCount={data.impressionsCount}
-                  visualizationCount={data.visualizationCount}
-                  interactionCount={data.takeAwayCount + data.putBackCount}
-                  takeAwayCount={data.takeAwayCount}
-                  putBackCount={data.putBackCount}
+                  impressionCount={data.pipelineData.impressionsCount}
+                  visualizationCount={data.pipelineData.visualizationsCount}
+                  interactionCount={data.pipelineData.interactionsCount}
+                  takeAwayCount={data.pipelineData.takeAwayCount}
+                  putBackCount={data.pipelineData.putBackCount}
                 />
+              </div>
+              <div className="md:col-span-8">
+                <Accordion 
+                  type="multiple" 
+                  className="space-y-2"
+                  value={openSections}
+                  onValueChange={setOpenSections}
+                >
+                  {TIMELINE_SECTIONS.map((section) => (
+                    <TimelineSection
+                      key={section.id}
+                      value={section.id}
+                      title={section.title}
+                      tooltip={section.tooltip}
+                      data={data.timelineData[section.dataKey]}
+                      timeRange={timeRange}
+                      isLoading={isLoading}
+                    />
+                  ))}
+                </Accordion>
               </div>
             </>
           ) : null}
         </div>
+
+        {data && (
+          <WeekDataVisualization aggregatedData={data.aggregatedData} />
+        )}
+
+        {!isLoading && <ChatModal 
+          impressions={data?.timelineData.impressionsTimeline}
+          visualizations={data?.timelineData.visualizationsTimeline}
+          interactions={data?.timelineData.pickUpTimeline}
+          takeaways={data?.timelineData.takeAwayTimeline}
+          putbacks={data?.timelineData.putBackTimeline}
+        />}
       </div>
     </div>
   );
