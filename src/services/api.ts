@@ -1,9 +1,7 @@
 // services/mongoService.ts
 // const API_URL = 'http://localhost:8000';
-const API_URL = window.location.protocol === 'https:' 
-  ? `wss://ec2-18-189-143-77.us-east-2.compute.amazonaws.com:8000`
-  : `ws://ec2-18-189-143-77.us-east-2.compute.amazonaws.com:8000`;
-  
+const API_URL = "https://api.nuviz.com.br";
+
 interface DateRangeRequest {
   start_date: string;
   end_date: string;
