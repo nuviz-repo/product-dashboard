@@ -115,13 +115,13 @@ const Index = () => {
           <WeekDataVisualization aggregatedData={data.aggregatedData} />
         )}
 
-        {!isLoading && <ChatModal 
+        {/* {!isLoading && <ChatModal 
           impressions={data?.timelineData.impressionsTimeline}
           visualizations={data?.timelineData.visualizationsTimeline}
           interactions={data?.timelineData.pickUpTimeline}
           takeaways={data?.timelineData.takeAwayTimeline}
           putbacks={data?.timelineData.putBackTimeline}
-        />}
+        />} */}
       </div>
     </div>
   );

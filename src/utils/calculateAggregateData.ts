@@ -1,4 +1,4 @@
-interface ProductInteractionDisplay {
+export interface ProductInteractionDisplay {
     interaction_time: string;
     product: string;
     interactions: number;
