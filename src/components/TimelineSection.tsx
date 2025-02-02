@@ -70,7 +70,7 @@ export const TIMELINE_SECTIONS = [
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <AccordionTrigger className="text-lg font-medium hover:bg-white/50 px-4 py-2 rounded-lg">
+              <AccordionTrigger className="text-lg font-medium font-nikkei hover:bg-white/50 px-4 py-2 rounded-lg">
                 {title}
               </AccordionTrigger>
             </TooltipTrigger>

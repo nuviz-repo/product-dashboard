@@ -61,7 +61,7 @@ export const useDashboardData = (dateRange?: DateRange, selectedSkuNames?: strin
     const takeAwaysCount = interactions.filter(interaction => interaction.take_away).length;
     const pipelineData = {
       impressionsCount: impressions.length + interactions.length, // All interactions are considered impression
-      visualizationsCount: visualizations.length,
+      visualizationsCount: visualizations.length + interactions.length, // All interactions are considered visualization also
       interactionsCount: interactions.length,
       takeAwayCount: takeAwaysCount,
       putBackCount: interactions.length - takeAwaysCount

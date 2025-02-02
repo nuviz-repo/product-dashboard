@@ -54,16 +54,16 @@ export function TimeChart({ data, timeRange, title }: TimeChartProps) {
 
   return (
     <Card className="w-full">
-      <CardHeader className="p-4">
+      {/* <CardHeader className="p-4">
         <CardTitle className="text-secondary text-sm">
           {title}
         </CardTitle>
-      </CardHeader>
-      <CardContent className="h-[200px] p-4">
+      </CardHeader> */}
+      <CardContent className="h-[250px] p-4 mt-3">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={smoothedData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 5, right: 40, left: 0, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis

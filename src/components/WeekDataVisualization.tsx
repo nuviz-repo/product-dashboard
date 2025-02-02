@@ -22,9 +22,9 @@ const METRICS_MAP = {
 } as const;
 
 const TIME_SLOTS = {
-  MORNING: { label: 'Morning (6am-12pm)', color: 'bg-yellow-100 hover:bg-yellow-200' },
-  AFTERNOON: { label: 'Afternoon (12pm-6pm)', color: 'bg-orange-100 hover:bg-orange-200' },
-  EVENING: { label: 'Evening (6pm-12am)', color: 'bg-blue-100 hover:bg-blue-200' },
+  MORNING: { label: 'Morning (6am-12pm)', color: 'bg-blue-300 hover:bg-blue-500' },
+  AFTERNOON: { label: 'Afternoon (12pm-6pm)', color: 'bg-cyan-300 hover:bg-cyan-400' },
+  EVENING: { label: 'Evening (6pm-12am)', color: 'bg-indigo-300 hover:bg-indigo-1000' },
 } as const;
 
 type MetricKey = keyof typeof METRICS_MAP;
