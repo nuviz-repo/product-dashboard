@@ -23,7 +23,7 @@ export function DatePickerWithRange({
   className,
 }: DatePickerWithRangeProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col">
       <div className={cn("grid gap-2", className)}>
         <Popover>
           <PopoverTrigger asChild>
@@ -62,7 +62,7 @@ export function DatePickerWithRange({
           </PopoverContent>
         </Popover>
       </div>
-      <div className="flex items-center text-xs text-muted-foreground">
+      <div className="flex items-center text-xs text-muted-foreground mt-1 ml-1">
         <Info className="h-3 w-3 mr-1" />
         <span>Available Data: Jan 27 - Feb 03</span>
       </div>

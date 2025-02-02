@@ -24,31 +24,36 @@ export function ProductMetrics({
 
   const metrics = [
     {
-      label: "Impressions",
+      mainLabel: "Impressions",
+      secondaryLabel: "",
       value: impressionCount,
       color: "bg-indigo-950",
       percentage: ((impressionCount / total) * 100).toFixed(1)
     },
     {
-      label: `Visualizations (Conversion = ${visualizationConversion}%)`,
+      mainLabel: "Visualizations",
+      secondaryLabel: `CTR: ${visualizationConversion}%`,
       value: visualizationCount,
       color: "bg-indigo-900",
       percentage: ((visualizationCount / total) * 100).toFixed(1)
     },
     {
-      label: `Pick Ups (Conversion = ${pickUpConversion}%)`,
+      mainLabel: "Pick Ups",
+      secondaryLabel: `Rate: ${pickUpConversion}%`,
       value: interactionCount,
       color: "bg-blue-500",
       percentage: ((interactionCount / total) * 100).toFixed(1)
     },
     {
-      label: `Take Away (Conversion = ${takeAwayConversion}%)`,
+      mainLabel: "Take Away",
+      secondaryLabel: `Rate: ${takeAwayConversion}%`,
       value: takeAwayCount,
       color: "bg-blue-600",
       percentage: ((takeAwayCount / total) * 100).toFixed(1)
     },
     {
-      label: `Put Back (Conversion = ${putBackConversion}%)`,
+      mainLabel: "Put Back",
+      secondaryLabel: `Rate: ${putBackConversion}%`,
       value: putBackCount,
       color: "bg-cyan-400",
       percentage: ((putBackCount / total) * 100).toFixed(1)
@@ -56,14 +61,24 @@ export function ProductMetrics({
   ];
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-lg font-medium font-nikkei">Product Interaction Funnel</h2>
+    <div>
+      <h2 className="text-lg font-medium font-nikkei hover:bg-white/50 px-4 py-2 rounded-lg mb-2">
+        Product Interaction Funnel
+      </h2>
       <Card className="p-4">
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {metrics.map((metric) => (
-            <div key={metric.label} className="space-y-1">
+            <div key={metric.mainLabel} className="space-y-1">
               <div className="flex justify-between text-sm">
-                <span>{metric.label}</span>
+                <span>
+                  {metric.mainLabel}
+                  {metric.secondaryLabel && (
+                    <>
+                      <span className="font-normal">; </span>
+                      <span className="italic text-[13px]">{metric.secondaryLabel}</span>
+                    </>
+                  )}
+                </span>
                 <span className="font-medium">{metric.value}</span>
               </div>
               <div className="h-2 rounded-full bg-gray-200">
