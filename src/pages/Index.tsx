@@ -112,7 +112,9 @@ const Index = () => {
         </div>
 
         {data && (
-          <WeekDataVisualization aggregatedData={data.aggregatedData} />
+          <div className="w-full">
+            <WeekDataVisualization aggregatedData={data.aggregatedData} />
+          </div>
         )}
 
         {/* {!isLoading && <ChatModal 

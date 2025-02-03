@@ -106,8 +106,8 @@ const WeekDataVisualization: React.FC<WeekDataVisualizationProps> = ({ aggregate
   };
 
   return (
-    <div className="w-full max-w-6xl p-4">
-      <div className="flex justify-between items-start mb-8">
+    <div className="w-full p-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         {/* Control Section */}
         <div className="flex gap-4">
           <Select
@@ -142,7 +142,7 @@ const WeekDataVisualization: React.FC<WeekDataVisualizationProps> = ({ aggregate
         </div>
 
         {/* Legend */}
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap gap-4 items-center">
           {Object.entries(TIME_SLOTS).map(([key, { label, color }]) => (
             <div key={key} className="flex items-center gap-2">
               <div className={`w-4 h-4 ${color.split(' ')[0]} rounded`} />
@@ -153,13 +153,13 @@ const WeekDataVisualization: React.FC<WeekDataVisualizationProps> = ({ aggregate
       </div>
 
       {/* Week View */}
-      <div className="flex gap-2 justify-between">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
         {daysOfWeek.map((day, index) => {
           const dayData = calculatePercentages(day);
           const emptyDayClass = !dayData.hasActivity ? 'opacity-50' : '';
           
           return (
-            <Card key={day} className={`w-32 ${emptyDayClass}`}>
+            <Card key={day} className={`w-full ${emptyDayClass}`}>
               <CardContent className="p-2">
                 <div className="text-sm font-medium mb-2 text-center">
                   {shortDays[index]}
