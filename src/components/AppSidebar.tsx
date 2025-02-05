@@ -21,7 +21,7 @@ export function AppSidebar() {
   const { toggleSidebar, state } = useSidebar();
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <div className="flex items-center justify-between px-4 py-2">
           <h2 className="text-lg font-semibold">Navigation</h2>
