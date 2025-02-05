@@ -4,12 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { SidebarProvider } from "./components/ui/sidebar";
-import { AppSidebar } from "./components/AppSidebar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Account from "./pages/Account";
-import Insights from "./pages/Insights";
 
 const queryClient = new QueryClient();
 
@@ -27,17 +23,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        {children}
-      </div>
-    </SidebarProvider>
-  );
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -51,29 +36,7 @@ const App = () => (
               path="/"
               element={
                 <ProtectedRoute>
-                  <ProtectedLayout>
-                    <Index />
-                  </ProtectedLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/account"
-              element={
-                <ProtectedRoute>
-                  <ProtectedLayout>
-                    <Account />
-                  </ProtectedLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/insights"
-              element={
-                <ProtectedRoute>
-                  <ProtectedLayout>
-                    <Insights />
-                  </ProtectedLayout>
+                  <Index />
                 </ProtectedRoute>
               }
             />
