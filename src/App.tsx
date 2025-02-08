@@ -4,8 +4,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { DashboardProvider } from "./contexts/DashboardContext";
+import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Insights from "./pages/Insights";
+import Account from "./pages/Account";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +27,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const ProtectedLayout = () => (
+  <ProtectedRoute>
+    <DashboardProvider>
+      <Layout />
+    </DashboardProvider>
+  </ProtectedRoute>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -32,14 +44,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/" element={<ProtectedLayout />}>
+              <Route index element={<Index />} />
+              <Route path="insights" element={<Insights />} />
+              <Route path="account" element={<Account />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

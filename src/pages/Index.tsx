@@ -1,35 +1,40 @@
 import { ProductMetrics } from "@/components/ProductMetrics";
 import ProductFilters from "@/components/ProductFilters";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DatePickerWithRange } from "@/components/DatePickerWithRange";
 import { addDays } from "date-fns";
 import WeekDataVisualization from "@/components/WeekDataVisualization";
-import { useDashboardData } from "@/hooks/useDashboardData";
 import { Accordion } from "@/components/ui/accordion";
 import TimelineSection, { TIMELINE_SECTIONS } from "@/components/TimelineSection";
-import ChatModal from "@/components/ChatModel";
+import ChatModal from "@/components/ChatComponent";
+import { useDashboard } from "@/contexts/DashboardContext";
+import { useProcessedDashboardData } from "@/hooks/useDashboardData"
 
 const Index = () => {
-  const [date, setDate] = useState<{
-    from: Date;
-    to?: Date;
-  }>({
-    from: new Date(),
-    to: addDays(new Date(), 1),
-  });
+  const { 
+    dashboardState: { date, selectedSkuNames },
+    setDate,
+    setSelectedSkuNames,
+    setTimelineData
+  } = useDashboard();
 
-  const [selectedSkuNames, setSelectedSkuNames] = useState<string[]>([]);
+  const { data, isLoading, error } = useProcessedDashboardData({
+    startDate: date.from?.toISOString(),
+    endDate: date.to?.toISOString(),
+  }, selectedSkuNames)
+
+  // Update timeline data in context whenever it changes
+  useEffect(() => {
+    if (data?.timelineData) {
+      setTimelineData(data.timelineData);
+    }
+  }, [data?.timelineData, setTimelineData]);
   
   // State to track open accordion sections
   const [openSections, setOpenSections] = useState<string[]>(
     ["product-interaction"] // Initially the first one is open
   );
-
-  const { data, isLoading, error } = useDashboardData({
-    startDate: date.from?.toISOString(),
-    endDate: date.to?.toISOString(),
-  }, selectedSkuNames);
 
   if (error) {
     return (

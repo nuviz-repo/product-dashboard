@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DayPeriodData } from '@/hooks/useDashboardData';
+import { DayPeriodData } from '@/types/api';
 
 interface WeekDataVisualizationProps {
   aggregatedData: {
@@ -35,7 +35,7 @@ const WeekDataVisualization: React.FC<WeekDataVisualizationProps> = ({ aggregate
   const [selectedFormula, setSelectedFormula] = useState<FormulaType>('sum');
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>('pickUps');
 
-  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const daysOfWeek = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
   const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const getValueForPeriod = (day: string, period: TimeSlot) => {
@@ -122,7 +122,6 @@ const WeekDataVisualization: React.FC<WeekDataVisualizationProps> = ({ aggregate
               <SelectItem value="avg">AVG</SelectItem>
               <SelectItem value="max">MAX</SelectItem>
               <SelectItem value="min">MIN</SelectItem>
-              <SelectItem value="median">MED</SelectItem>
             </SelectContent>
           </Select>
 

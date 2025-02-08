@@ -1,6 +1,6 @@
 // services/mongoService.ts
-// const API_URL = 'http://localhost:8000';
-const API_URL = "https://api.nuviz.com.br";
+const API_URL = 'http://localhost:8000';
+// const API_URL = "https://api.nuviz.com.br";
 
 interface DateRangeRequest {
   start_date: string;
@@ -152,6 +152,120 @@ export async function getImpressionProducts(dateRange: DateRangeRequest): Promis
     return await response.json();
   } catch (error) {
     console.error('Error fetching impression products:', error);
+    return [];
+  }
+}
+
+interface TimelineRequest {
+  start_date: string;
+  end_date: string;
+  interval: number;
+  sku_names: string[];
+}
+
+interface TimelineDataPoint {
+  timestamp: string;
+  values: { [key: string]: number };
+}
+
+interface TimelineResponse {
+  pickupTimeline: TimelineDataPoint[];
+  impressionsTimeline: TimelineDataPoint[];
+  visualizationTimeline: TimelineDataPoint[];
+  putbackTimeline: TimelineDataPoint[];
+  takeawayTimeline: TimelineDataPoint[];
+}
+
+interface DailyMetricsRequest {
+  start_date: string;
+  end_date: string;
+  sku_names: string[];
+}
+
+interface DailyMetric {
+  date: string;
+  period: string;
+  weekDay: string;
+  metrics: {
+    by_product: {
+      [key: string]: {
+        interactions: number;
+        interactionsCount: number;
+        visualizations: number;
+        visualizationsCount: number;
+        impressions: number;
+        impressionsCount: number;
+        take_aways: number;
+        put_backs: number;
+      };
+    };
+    by_category: { [key: string]: any };
+    by_brand: { [key: string]: any };
+  };
+}
+
+
+export async function getTimelineData(request: TimelineRequest): Promise<TimelineResponse> {
+  try {
+    const response = await fetch(`${API_URL}/timeline/data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Validate the response structure
+    if (!data.pickupTimeline || !data.impressionsTimeline || 
+        !data.visualizationTimeline || !data.putbackTimeline || 
+        !data.takeawayTimeline) {
+      throw new Error('Invalid timeline data structure received from server');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching timeline data:', error);
+    // Return empty arrays for each timeline
+    return {
+      pickupTimeline: [],
+      impressionsTimeline: [],
+      visualizationTimeline: [],
+      putbackTimeline: [],
+      takeawayTimeline: []
+    };
+  }
+}
+
+export async function getDailyMetrics(request: DailyMetricsRequest): Promise<DailyMetric[]> {
+  try {
+    const response = await fetch(`${API_URL}/metrics/daily`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Validate that we received an array
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid daily metrics data structure received from server');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching daily metrics:', error);
     return [];
   }
 }

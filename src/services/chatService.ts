@@ -1,32 +1,34 @@
+// src/services/chatService.ts
 import { ChatResponse, Message, TimelineData } from "@/types/chat";
-  
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api';
-  
+
 export const chatService = {
-    initialize: async (data: TimelineData): Promise<string> => {
+    initialize: async (message: string, data: TimelineData): Promise<string> => {
         try {
             const response = await fetch(`${API_URL}/chat/initialize`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ data })
+                body: JSON.stringify({ 
+                    message,
+                    data 
+                })
             });
 
-            console.log("Response: ", response)
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result: ChatResponse = await response.json();
-        return result.message;
+            const result: ChatResponse = await response.json();
+            return result.message;
         } catch (error) {
             console.error('Error initializing chat:', error);
             throw error;
         }
     },
-  
+
     sendMessage: async (
         message: string, 
         data: TimelineData, 
