@@ -84,8 +84,6 @@ export const TIMELINE_SECTIONS = [
             <TimeChart 
               data={data} 
               timeRange={timeRange} 
-              intervalMinutes={5}
-              title={title}
             />
           </div>
         </AccordionContent>

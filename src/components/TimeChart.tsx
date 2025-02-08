@@ -11,8 +11,17 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import generateColor from '@/utils/colorTimeline';
-import smoothData, { TimeChartProps } from '@/utils/smoothTimelineData';
+import { TimelineDataPoint } from '@/types/timelineData';
 
+interface TimeChartProps {
+  data: Array<TimelineDataPoint>;
+  timeRange: {
+    start: string;
+    end: string;
+  };
+  intervalMinutes?: number;
+  title?: string;
+}
 
 function formatXAxisTick(timeStr: string, rangeHours: number): string {
   const date = new Date(timeStr);
@@ -35,6 +44,24 @@ function formatXAxisTick(timeStr: string, rangeHours: number): string {
   }
 }
 
+function normalizeTimelineData(data: TimelineDataPoint[], products: Set<string>): TimelineDataPoint[] {
+  if (data.length === 0) return [];
+
+  // Normalize each data point to include all products
+  return data.map(dataPoint => {
+    const normalizedPoint: TimelineDataPoint = {
+      timestamp: dataPoint.timestamp
+    };
+
+    // Add each product with its value or 0 if missing
+    products.forEach(product => {
+      normalizedPoint[product] = dataPoint[product] || 0;
+    });
+
+    return normalizedPoint;
+  });
+}
+
 export function TimeChart({ data, timeRange, title }: TimeChartProps) {
   const rangeHours = useMemo(() => {
     const start = new Date(timeRange.start);
@@ -42,23 +69,20 @@ export function TimeChart({ data, timeRange, title }: TimeChartProps) {
     return (end.getTime() - start.getTime()) / (1000 * 60 * 60);
   }, [timeRange]);
 
-  const smoothedData = useMemo(
-    () => smoothData(data, timeRange), 
-    [data, timeRange]
-  );
-  
-  const products = useMemo(
-    () => [...new Set(data.map(entry => entry.product))], 
-    [data]
-  );
+  let productsSet = new Set<string>();
+  data.forEach(dataPoint => {
+    Object.keys(dataPoint).forEach(key => {
+      if (key !== 'timestamp') {
+        productsSet.add(key);
+      }
+    });
+  });
+
+  const products = Array.from(productsSet.values())
+  const smoothedData = normalizeTimelineData(data, productsSet)
 
   return (
     <Card className="w-full">
-      {/* <CardHeader className="p-4">
-        <CardTitle className="text-secondary text-sm">
-          {title}
-        </CardTitle>
-      </CardHeader> */}
       <CardContent className="h-[250px] p-4 mt-3">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
