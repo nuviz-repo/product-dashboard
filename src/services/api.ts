@@ -1,6 +1,6 @@
 // services/mongoService.ts
-const API_URL = 'http://localhost:8000';
-// const API_URL = "https://api.nuviz.com.br";
+// const API_URL = 'http://localhost:8000';
+const API_URL = "https://api.nuviz.com.br";
 
 interface DateRangeRequest {
   start_date: string;
