@@ -246,8 +246,10 @@ export async function getDailyMetrics(request: DailyMetricsRequest): Promise<Dai
   try {
     const response = await fetch(`${API_URL}/metrics/daily`, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
       },
       body: JSON.stringify(request)
     });
