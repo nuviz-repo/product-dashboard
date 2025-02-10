@@ -244,7 +244,7 @@ export async function getTimelineData(request: TimelineRequest): Promise<Timelin
 
 export async function getDailyMetrics(request: DailyMetricsRequest): Promise<DailyMetric[]> {
   try {
-    const response = await fetch(`${API_URL}/metrics/daily`, {
+    const response = await fetch(`${API_URL}/daily/stats`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {
