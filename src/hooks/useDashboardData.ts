@@ -109,7 +109,8 @@ export const useProcessedDashboardData = (dateRange?: DateRange, selectedSkuName
     return {
       pipelineData,
       timelineData: processedTimelineData,
-      aggregatedData: processMetrics(dailyMetricsData)
+      aggregatedData: processMetrics(dailyMetricsData),
+      dailyMetric: dailyMetricsData
     };
   };
 

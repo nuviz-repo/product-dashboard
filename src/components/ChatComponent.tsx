@@ -8,7 +8,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { chatService } from '../services/chatService';
-import { ChatModalProps, Message, TimelineData, ChatComponentProps } from "@/types/chat";
+import { Message, ChatComponentProps, TimelineDataForChat, BaseTimelineDataPerMetric } from "@/types/chat";
+import { TIMELINE_SECTIONS } from './TimelineSection';
+import { useDashboard } from '@/contexts/DashboardContext';
 
 const INITIAL_SUGGESTIONS = [
   {
@@ -23,27 +25,54 @@ const INITIAL_SUGGESTIONS = [
   }
 ];
 
+const impressionSectionData = TIMELINE_SECTIONS.filter(section => section.id == "product-impressions")
+const interactionSectionData = TIMELINE_SECTIONS.filter(section => section.id == "product-interaction")
+const visualizationSectionData = TIMELINE_SECTIONS.filter(section => section.id == "product-visualization")
+const takeawaySectionData = TIMELINE_SECTIONS.filter(section => section.id == "product-takeaway")
+const putbackSectionData = TIMELINE_SECTIONS.filter(section => section.id == "product-putback")
+
 const ChatComponent: React.FC<ChatComponentProps> = ({ 
   impressions, 
   visualizations, 
   interactions, 
   takeaways, 
   putbacks,
+  dailyMetric,
   defaultOpen = false,
   isInline = false,
   className = '',
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { dashboardState: { chatMessages }, setChatMessages } = useDashboard();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
-  const timelineData = {
-    impressions,
-    visualizations,
-    interactions,
-    takeaways,
-    putbacks
+  const timelineData: TimelineDataForChat = {
+    impressions: {
+      name: impressionSectionData[0].title,
+      description: impressionSectionData[0].tooltip,
+      data: impressions
+    } as BaseTimelineDataPerMetric,
+    visualizations: {
+      name: visualizationSectionData[0].title,
+      description: visualizationSectionData[0].tooltip,
+      data: visualizations
+    } as BaseTimelineDataPerMetric,
+    interactions: {
+      name: interactionSectionData[0].title,
+      description: interactionSectionData[0].tooltip,
+      data: interactions
+    } as BaseTimelineDataPerMetric,
+    takeaways: {
+      name: takeawaySectionData[0].title,
+      description: takeawaySectionData[0].tooltip,
+      data: takeaways
+    } as BaseTimelineDataPerMetric,
+    putbacks: {
+      name: putbackSectionData[0].title,
+      description: putbackSectionData[0].tooltip,
+      data: putbacks
+    } as BaseTimelineDataPerMetric
   };
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,16 +86,16 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
         role: 'user' as const, 
         content: prompt 
       };
-      setMessages([userMessage]);
+      setChatMessages([userMessage]);
 
-      const aiResponse = await chatService.initialize(prompt, timelineData);
-      setMessages([
+      const aiResponse = await chatService.initialize(prompt, timelineData, dailyMetric);
+      setChatMessages([
         userMessage,
         { role: 'assistant' as const, content: aiResponse }
       ]);
     } catch (error) {
       console.error('Error with suggestion:', error);
-      setMessages([
+      setChatMessages([
         { role: 'assistant' as const, content: 'Sorry, I encountered an error. Please try again.' }
       ]);
     } finally {
@@ -82,42 +111,43 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       setIsLoading(true);
 
       try {
-        if (messages.length === 0) {
-          const aiResponse = await chatService.initialize(userMessage, timelineData);
+        if (chatMessages.length === 0) {
+          const aiResponse = await chatService.initialize(userMessage, timelineData, dailyMetric);
           const newMessages: Message[] = [
             { role: 'user' as const, content: userMessage },
             { role: 'assistant' as const, content: aiResponse }
           ];
-          setMessages(newMessages);
+          setChatMessages(newMessages);
         } else {
           const updatedMessages: Message[] = [
-            ...messages, 
+            ...chatMessages, 
             { role: 'user' as const, content: userMessage }
           ];
-          setMessages(updatedMessages);
+          setChatMessages(updatedMessages);
 
           const aiResponse = await chatService.sendMessage(
             userMessage,
             timelineData,
+            dailyMetric,
             updatedMessages
           );
           
-          setMessages([
+          setChatMessages([
             ...updatedMessages, 
             { role: 'assistant' as const, content: aiResponse }
           ]);
         }
       } catch (error) {
         console.error('Error sending message:', error);
-        setMessages(prevMessages => [
-          ...prevMessages,
+        setChatMessages([
+          ...chatMessages,
           { role: 'assistant' as const, content: 'Sorry, I encountered an error. Please try again.' }
         ]);
       } finally {
         setIsLoading(false);
       }
     }
-  }, [input, isLoading, messages, timelineData]);
+  }, [input, isLoading, chatMessages, timelineData, dailyMetric, setChatMessages]);
 
   const SuggestionsView = () => (
     <div className="flex flex-col space-y-4 p-4">
@@ -141,11 +171,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   const ChatContent = () => (
     <>
       <div className="flex-1 overflow-y-auto">
-        {messages.length === 0 ? (
+        {chatMessages.length === 0 ? (
           <SuggestionsView />
         ) : (
           <div className="flex flex-col space-y-4 p-4">
-            {messages.map((message, index) => (
+            {chatMessages.map((message, index) => (
               <div
                 key={index}
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}

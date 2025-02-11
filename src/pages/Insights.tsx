@@ -4,7 +4,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { useNavigate } from 'react-router-dom';
 
 const Insights = () => {
-  const { dashboardState: { timelineData } } = useDashboard();
+  const { dashboardState: { timelineData, dailyMetricData } } = useDashboard();
   const navigate = useNavigate();
 
   if (!timelineData) {
@@ -51,6 +51,7 @@ const Insights = () => {
           interactions={timelineData.pickUpTimeline}
           takeaways={timelineData.takeAwayTimeline}
           putbacks={timelineData.putBackTimeline}
+          dailyMetric={dailyMetricData}
           isInline={true}
           className="h-full flex flex-col" 
           defaultOpen={false}        

@@ -1,6 +1,7 @@
 // src/types/chat.ts
 import { ProductInteractionDisplay } from "@/utils/calculateAggregateData";
 import { LucideIcon } from 'lucide-react';
+import { DailyMetric } from "./api";
 
 export interface TimelineData {
     impressions: ProductInteractionDisplay[];
@@ -8,6 +9,20 @@ export interface TimelineData {
     interactions: ProductInteractionDisplay[];
     takeaways: ProductInteractionDisplay[];
     putbacks: ProductInteractionDisplay[];
+}
+
+export interface TimelineDataForChat {
+    impressions: BaseTimelineDataPerMetric;
+    visualizations: BaseTimelineDataPerMetric;
+    interactions: BaseTimelineDataPerMetric;
+    takeaways: BaseTimelineDataPerMetric;
+    putbacks: BaseTimelineDataPerMetric;
+}
+
+export interface BaseTimelineDataPerMetric {
+    name: string;
+    description: string;
+    data: ProductInteractionDisplay[];
 }
 
 export interface Message {
@@ -39,4 +54,5 @@ export interface ChatSuggestion {
 export interface ChatComponentProps extends ChatModalProps {
     isInline?: boolean;
     className?: string;
+    dailyMetric: DailyMetric[];
 }

@@ -15,7 +15,8 @@ const Index = () => {
     dashboardState: { date, selectedSkuNames },
     setDate,
     setSelectedSkuNames,
-    setTimelineData
+    setTimelineData,
+    setDailyMetricData
   } = useDashboard();
 
   const { data, isLoading, error } = useProcessedDashboardData({
@@ -29,6 +30,13 @@ const Index = () => {
       setTimelineData(data.timelineData);
     }
   }, [data?.timelineData, setTimelineData]);
+
+  // Update daily metric data in context whenever it changes
+  useEffect(() => {
+    if (data?.dailyMetric) {
+      setDailyMetricData(data.dailyMetric);
+    }
+  }, [data?.dailyMetric, setDailyMetricData]);
   
   // State to track open accordion sections
   const [openSections, setOpenSections] = useState<string[]>(
