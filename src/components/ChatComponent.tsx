@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { MessageCircle, Send, TrendingUp, Search } from 'lucide-react';
 import {
   Dialog,
@@ -46,17 +46,19 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     putbacks
   };
 
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  }, []);
+
   const handleSuggestionClick = async (prompt: string) => {
     setIsLoading(true);
     try {
-      // Add user message immediately
       const userMessage: Message = { 
         role: 'user' as const, 
         content: prompt 
       };
       setMessages([userMessage]);
 
-      // Get AI response through initialize
       const aiResponse = await chatService.initialize(prompt, timelineData);
       setMessages([
         userMessage,
@@ -72,7 +74,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     }
   };
 
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSend = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       const userMessage = input.trim();
@@ -81,7 +83,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
       try {
         if (messages.length === 0) {
-          // First message - use initialize
           const aiResponse = await chatService.initialize(userMessage, timelineData);
           const newMessages: Message[] = [
             { role: 'user' as const, content: userMessage },
@@ -89,7 +90,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
           ];
           setMessages(newMessages);
         } else {
-          // Subsequent messages - use sendMessage
           const updatedMessages: Message[] = [
             ...messages, 
             { role: 'user' as const, content: userMessage }
@@ -109,15 +109,15 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
         }
       } catch (error) {
         console.error('Error sending message:', error);
-        setMessages([
-          ...messages,
+        setMessages(prevMessages => [
+          ...prevMessages,
           { role: 'assistant' as const, content: 'Sorry, I encountered an error. Please try again.' }
         ]);
       } finally {
         setIsLoading(false);
       }
     }
-  };
+  }, [input, isLoading, messages, timelineData]);
 
   const SuggestionsView = () => (
     <div className="flex flex-col space-y-4 p-4">
@@ -181,10 +181,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Ask about your product metrics..."
             className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
+            autoFocus
           />
           <button
             type="submit"
