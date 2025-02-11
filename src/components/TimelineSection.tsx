@@ -16,33 +16,33 @@ import TimeChart from "./TimeChart";
 export const TIMELINE_SECTIONS = [
     {
       id: 'product-interaction',
-      title: 'Product Interaction Timeline',
+      title: 'Average Pick-Up Duration (in seconds)',
       dataKey: 'pickUpTimeline',
-      tooltip: 'This graph shows when customers interact with products by picking them up. Higher peaks indicate more customer engagement.'
+      tooltip: 'The average time a customer holds a product after picking it up, calculated by dividing the total holding duration by the number of pick-ups.'
     },
     {
       id: 'product-impressions',
-      title: 'Product Impressions Timeline',
+      title: 'Product Impressions Timeline (# of times)',
       dataKey: 'impressionsTimeline',
-      tooltip: 'Tracks the number of times products were viewed by customers. Helps understand product visibility and customer interest.'
+      tooltip: 'Tracks the number of times products were viewed by customers. Helps understand product visibility on the shop floor.'
     },
     {
       id: 'product-visualization',
-      title: 'Product Visualization Timeline',
+      title: 'Average Visualization Duration (in seconds)',
       dataKey: 'visualizationsTimeline',
-      tooltip: 'Displays when customers viewed detailed product information. Shows engagement with product details.'
+      tooltip: 'The average time a customer visualizes a product before picking it up, calculated by dividing the total visualization duration by the number of people viewed the product.'
     },
     {
       id: 'product-takeaway',
-      title: 'Product Take Away Timeline',
+      title: 'Product Take-Away Timeline (# of times)',
       dataKey: 'takeAwayTimeline',
-      tooltip: 'Records when products are taken by customers. Indicates potential purchase intent or strong interest.'
+      tooltip: 'Records # of times products are taken by customers. Indicates potential purchase intent attached to the place where data was collected.'
     },
     {
       id: 'product-putback',
-      title: 'Product Put Back Timeline',
+      title: 'Product Put-Back (# of times)',
       dataKey: 'putBackTimeline',
-      tooltip: 'Shows when products are returned to their display location. Helps understand product rejection patterns.'
+      tooltip: 'Records # of times products are returned to their display location. Helps understand product rejection patterns.'
     }
   ] as const;
   

@@ -39,7 +39,7 @@ const Insights = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-32px)] p-8">
       <div className="flex-none">
-        <h1 className="text-4xl font-bold mb-4 text-[#343dea]">Insights</h1>
+        <h1 className="text-2xl font-bold">Insights</h1>
         <p className="text-lg mb-4">
           Chat with our AI assistant to analyze your product metrics and get detailed insights.
         </p>

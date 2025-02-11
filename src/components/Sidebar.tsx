@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Lightbulb, User, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { LayoutDashboard, Lightbulb, User, ChevronLeft, ChevronRight, LogOut, LifeBuoy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -13,7 +13,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 interface SidebarProps {
@@ -42,6 +41,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
       icon: User,
       path: '/account',
     },
+    {
+      title: 'Support',
+      icon: LifeBuoy,
+      path: '/support',
+    },
   ];
 
   const handleLogout = async () => {
@@ -56,7 +60,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 h-screen bg-[#dedfda] border-r border-gray-200 transition-all duration-300 flex flex-col ${
+        className={`fixed top-0 left-0 h-screen bg-[#dedfda] border-gray-200 transition-all duration-300 flex flex-col ${
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
@@ -75,14 +79,14 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
         </Button>
 
         {/* Logo */}
-        <div className="p-4">
+        <div className="p-4 pt-11">
           <h1 
             className={`font-bold transition-all duration-300 ${
-              isCollapsed ? "text-2xl" : "text-3xl"
-            } text-[#343dea]`}
+              isCollapsed ? "text-xl" : "text-2xl"
+            } text-[#fb651e]`}
             style={{ fontFamily: "'Pivot Grotesk Regular', sans-serif" }}
           >
-            {isCollapsed ? "nv" : "nuviz"}
+            {isCollapsed ? "YC" : "YCombinator"}
           </h1>
         </div>
 

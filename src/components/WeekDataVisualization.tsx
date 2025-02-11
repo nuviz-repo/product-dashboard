@@ -24,11 +24,11 @@ const METRICS_MAP = {
 const TIME_SLOTS = {
   MORNING: { label: 'Morning (6am-12pm)', color: 'bg-blue-300 hover:bg-blue-500' },
   AFTERNOON: { label: 'Afternoon (12pm-6pm)', color: 'bg-cyan-300 hover:bg-cyan-400' },
-  EVENING: { label: 'Evening (6pm-12am)', color: 'bg-indigo-300 hover:bg-indigo-1000' },
+  EVENING: { label: 'Evening (6pm-12am)', color: 'bg-indigo-300 hover:bg-indigo-400' },
 } as const;
 
 type MetricKey = keyof typeof METRICS_MAP;
-type FormulaType = 'sum' | 'avg' | 'max' | 'min' | 'median';
+type FormulaType = 'sum' | 'avg' | 'max' | 'min';
 type TimeSlot = keyof typeof TIME_SLOTS;
 
 const WeekDataVisualization: React.FC<WeekDataVisualizationProps> = ({ aggregatedData }) => {

@@ -63,7 +63,7 @@ export function ProductMetrics({
   return (
     <div>
       <h2 className="text-lg font-medium font-nikkei hover:bg-white/50 px-4 py-2 rounded-lg mb-2">
-        Product Interaction Funnel
+        Product Interaction Funnel (# interactions)
       </h2>
       <Card className="p-4">
         <CardContent className="space-y-3">

@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Insights from "./pages/Insights";
 import Account from "./pages/Account";
+import Support from "./pages/Support";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route index element={<Index />} />
               <Route path="insights" element={<Insights />} />
               <Route path="account" element={<Account />} />
+              <Route path="support" element={<Support />} />
             </Route>
           </Routes>
         </BrowserRouter>
