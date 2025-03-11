@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Insights from "./pages/Insights";
+import VideoAnalysis from "./pages/VideoAnalysis";
 import Account from "./pages/Account";
 import Support from "./pages/Support";
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/" element={<ProtectedLayout />}>
               <Route index element={<Index />} />
               <Route path="insights" element={<Insights />} />
+              <Route path="video-analysis" element={<VideoAnalysis />} />
               <Route path="account" element={<Account />} />
               <Route path="support" element={<Support />} />
             </Route>

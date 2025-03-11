@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { LayoutDashboard, Lightbulb, User, ChevronLeft, ChevronRight, LogOut, LifeBuoy } from 'lucide-react';
+import { LayoutDashboard, Lightbulb, User, ChevronLeft, ChevronRight, LogOut, LifeBuoy, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -35,6 +35,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
       title: 'Insights',
       icon: Lightbulb,
       path: '/insights',
+    },
+    {
+      title: 'Video Analysis',
+      icon: Video,
+      path: '/video-analysis',
     },
     {
       title: 'Account',
