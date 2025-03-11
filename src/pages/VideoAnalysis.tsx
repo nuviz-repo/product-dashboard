@@ -170,30 +170,32 @@ const VideoAnalysis = () => {
   }, [selectedVideo]);
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Video Analysis</h1>
-      
-      {/* Video selection section */}
-      <div className="mb-8">
+    <div className="p-8 overflow-hidden">
+        <h1 className="text-2xl font-bold mb-6">Video Analysis</h1>
+        
+        {/* Video selection section - now with proper containment */}
+        <div className="mb-8">
         <h2 className="text-xl mb-4">Available Videos</h2>
         
         {loading ? (
-          <div className="flex gap-4 overflow-x-auto pb-4">
+            <div className="flex gap-4 overflow-x-auto pb-4 pr-4 relative" 
+                style={{ clipPath: 'inset(0)' }}>
             {[1, 2, 3, 4, 5].map(i => (
-              <Skeleton key={i} className="aspect-video w-80 flex-shrink-0 rounded-lg" />
+                <Skeleton key={i} className="aspect-video w-80 flex-shrink-0 rounded-lg" />
             ))}
-          </div>
+            </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4">
+            <div className="flex gap-4 overflow-x-auto pb-4 pr-4 relative" 
+                style={{ clipPath: 'inset(0)' }}>
             {videos.map(video => (
-              <VideoWithThumbnail
+                <VideoWithThumbnail
                 key={video.id}
                 video={video}
                 isSelected={selectedVideo === video.id}
                 onClick={() => setSelectedVideo(video.id)}
-              />
+                />
             ))}
-          </div>
+            </div>
         )}
       </div>
       

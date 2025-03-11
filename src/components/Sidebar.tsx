@@ -65,7 +65,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 h-screen bg-[#dedfda] border-gray-200 transition-all duration-300 flex flex-col ${
+        className={`fixed top-0 left-0 h-screen bg-[#dedfda] border-gray-200 transition-all duration-300 flex flex-col z-50 ${
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
