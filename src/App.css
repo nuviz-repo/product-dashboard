@@ -18,6 +18,30 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+/* Ensure title containers provide consistent alignment */
+.title-container {
+  display: flex;
+  align-items: center;
+  height: 70px;
+  position: relative;
+}
+
+/* Sidebar specific title container */
+.sidebar .title-container {
+  justify-content: flex-start;
+}
+
+/* Ensure the title text renders with the same baseline position */
+.brand-title {
+  position: relative;
+  line-height: 1;
+}
+
+/* When in sidebar, ensure text is white */
+.sidebar .brand-title {
+  color: white;
+}
+
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);

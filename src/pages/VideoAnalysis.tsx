@@ -22,8 +22,8 @@ interface Video {
 
 interface VideoData {
   session_id: string;
-  recording_start_at: string;
-  recording_finish_at: string;
+  recording_start_at: number;
+  recording_finish_at: number;
   sku_id: string;
   sku_name: string;
   sku_category: string;
@@ -89,21 +89,16 @@ const VideoWithThumbnail = ({
           />
         ) : (
           <div 
-            className="w-full h-full bg-cover bg-center relative"
+            className="w-full h-full relative"
             style={{ 
-              backgroundImage: `url(${thumbnailUrl || video.thumbnail_url})` 
+              backgroundColor: '#5f6fff'
             }}
           >
-            {/* Hidden video to preload and generate thumbnail */}
-            <video 
-              ref={videoRef}
-              src={video.video_url}
-              className="hidden"
-              preload="metadata"
-              onLoadedData={generateThumbnail}
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-              <span className="text-white font-medium">{video.title}</span>
+            <div className="absolute inset-0 flex items-center justify-center flex-col text-center">
+              <div className="flex flex-col items-center text-center text-white">
+                <span className="font-medium">{video.title}</span>
+                <span className="font-medium">{video.category}</span>
+              </div>
             </div>
           </div>
         )}
@@ -175,7 +170,7 @@ const VideoAnalysis = () => {
         
         {/* Video selection section - now with proper containment */}
         <div className="mb-8">
-        <h2 className="text-xl mb-4">Available Videos</h2>
+        <h2 className="text-xl mb-4">Video Datasets</h2>
         
         {loading ? (
             <div className="flex gap-4 overflow-x-auto pb-4 pr-4 relative" 
@@ -203,7 +198,7 @@ const VideoAnalysis = () => {
       {selectedVideo && (
         <div>
           <h2 className="text-xl mb-4">
-            Video Details: {videos.find(v => v.id === selectedVideo)?.title}
+            {videos.find(v => v.id === selectedVideo)?.title} - Structured Data
           </h2>
           
           <div className="overflow-x-auto">
@@ -237,8 +232,8 @@ const VideoAnalysis = () => {
                         <TableCell>{row.sku_name}</TableCell>
                         <TableCell>{row.sku_category}</TableCell>
                         <TableCell>{row.sku_brand}</TableCell>
-                        <TableCell>{new Date(row.recording_start_at).toLocaleString()}</TableCell>
-                        <TableCell>{new Date(row.recording_finish_at).toLocaleString()}</TableCell>
+                        <TableCell>{new Date(row.recording_start_at * 1000).toLocaleString()}</TableCell>
+                        <TableCell>{new Date(row.recording_finish_at * 1000).toLocaleString()}</TableCell>
                         <TableCell>{row.visualization_flag ? `Yes (${row.visualization_period}s)` : 'No'}</TableCell>
                         <TableCell>
                           {row.pickup_timestamp ? `Yes (${row.pickup_period}s)` : 'No'}

@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ChatComponent from '@/components/ChatComponent';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { useNavigate } from 'react-router-dom';
+import WelcomePopup from '@/components/WelcomePopup';
 
 const Insights = () => {
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  
+  // Show popup when component mounts
+  useEffect(() => {
+    setShowWelcomePopup(true);
+  }, []);
+  
   const { dashboardState: { timelineData, dailyMetricData } } = useDashboard();
   const navigate = useNavigate();
 
@@ -38,6 +46,15 @@ const Insights = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-32px)] p-8">
+      <WelcomePopup
+        title="Insights Notification"
+        message="The insights displayed are based on simulated dashboard data, 
+        showcasing the functionality that will be available to our clients once 
+        we accumulate a relevant volume of data. For more details, please contact the founders."
+        isOpen={showWelcomePopup}
+        onClose={() => setShowWelcomePopup(false)}
+      />
+      
       <div className="flex-none">
         <h1 className="text-2xl font-bold">Insights</h1>
         <p className="text-lg mb-4">

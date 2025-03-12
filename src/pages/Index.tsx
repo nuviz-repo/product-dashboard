@@ -9,8 +9,17 @@ import TimelineSection, { TIMELINE_SECTIONS } from "@/components/TimelineSection
 import { useDashboard } from "@/contexts/DashboardContext";
 import { useProcessedDashboardData } from "@/hooks/useDashboardData"
 import { InfoIcon } from "lucide-react";
+import BrandTitle from "@/components/BrandTitle";
+import WelcomePopup from "@/components/WelcomePopup";
 
 const Index = () => {
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  
+  // Show popup when component mounts
+  useEffect(() => {
+    setShowWelcomePopup(true);
+  }, []);
+
   const { 
     dashboardState: { date, selectedSkuNames },
     setDate,
@@ -61,23 +70,23 @@ const Index = () => {
   };
   
   return (
-    <div 
-      className="min-h-screen bg-[#dedfda] p-8 pt-0" 
-      // style={{ border: `2px solid #070707` }}
-    >
+    <div className="min-h-screen p-8 pt-0">
+      <WelcomePopup
+        title="Dashboard Notification"
+        message="This data is simulated and intended to illustrate some of 
+        the key metrics that will be shared with future clients. 
+        For more details, please contact the founders"
+        isOpen={showWelcomePopup}
+        onClose={() => setShowWelcomePopup(false)}
+      />
+      
       <div className="max-w-7xl mx-auto space-y-8">
-        <div className="sticky top-0 z-50 bg-[#dedfda] border-b border-gray-200 shadow-sm">
+        <div className="sticky top-0 z-50 border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto px-8 py-4 space-y-1">
             <div className="flex justify-between items-center">
-              <h1 
-                className="text-[56px] font-bold" 
-                style={{ 
-                  fontFamily: "'Pivot Grotesk Regular', sans-serif", 
-                  color: '#343dea' 
-                }}
-              >
-                nuviz
-              </h1>
+              <div className="title-container flex items-center justify-center h-[70px]">
+                <BrandTitle size="large" className="font-bold"/>
+              </div>
               <div className="flex items-center gap-4">
                 <ProductFilters onSkuNamesChange={setSelectedSkuNames} />
                 <DatePickerWithRange date={date} setDate={setDate} />
@@ -87,7 +96,7 @@ const Index = () => {
               <div className="flex items-start gap-2">
                 <InfoIcon className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-gray-600">
-                  The data and information presented pertain to AMPM network stores under Contract #003. For more details about the contract and the respective stores, please contact the administrator.
+                This data is simulated and intended to demonstrate some of the metrics that will be shared with future clients. For more details, please contact the founders.
                 </span>
               </div>
             </div>

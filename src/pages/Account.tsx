@@ -7,7 +7,7 @@ const Account = () => {
 
   // Hardcoded data for demonstration
   const organizationInfo = {
-    name: "YCombinator",
+    name: "nuviz",
     role: "User",
     department: "Technology",
   };
@@ -16,7 +16,7 @@ const Account = () => {
     planName: "Demo",
     value: "$5,000/month",
     startDate: "February 1st, 2025",
-    endDate: "March 1st, 2025",
+    endDate: "-",
     status: "Active",
     billingCycle: "Monthly",
   };

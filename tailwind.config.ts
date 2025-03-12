@@ -22,7 +22,7 @@ export default {
 				'secondary': '18px', // Added secondary text size
 			},
 			fontFamily: {
-				'nikkei': ['"Nikkei Journal Regular"', 'sans-serif'], // Added Nikkei font
+				'nikkei': ['"Nikkei Journal Regular"', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

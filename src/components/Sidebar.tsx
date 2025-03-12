@@ -14,6 +14,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from '@/lib/supabase';
+import BrandTitle from "@/components/BrandTitle";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -27,6 +28,11 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
 
   const menuItems = [
     {
+      title: 'Video Analysis',
+      icon: Video,
+      path: '/video-analysis',
+    },
+    {
       title: 'Dashboard',
       icon: LayoutDashboard,
       path: '/',
@@ -35,11 +41,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
       title: 'Insights',
       icon: Lightbulb,
       path: '/insights',
-    },
-    {
-      title: 'Video Analysis',
-      icon: Video,
-      path: '/video-analysis',
     },
     {
       title: 'Account',
@@ -65,7 +66,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 h-screen bg-[#dedfda] border-gray-200 transition-all duration-300 flex flex-col z-50 ${
+        className={`sidebar fixed top-0 left-0 h-screen bg-[#343dea] border-gray-200 transition-all duration-300 flex flex-col z-50 ${
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
@@ -84,15 +85,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
         </Button>
 
         {/* Logo */}
-        <div className="p-4 pt-11">
-          <h1 
-            className={`font-bold transition-all duration-300 ${
-              isCollapsed ? "text-xl" : "text-2xl"
-            } text-[#fb651e]`}
-            style={{ fontFamily: "'Pivot Grotesk Regular', sans-serif" }}
-          >
-            {isCollapsed ? "YC" : "YCombinator"}
-          </h1>
+        <div className="px-5 title-container flex items-center justify-start h-[70px]">
+          <BrandTitle size="small" collapsed={isCollapsed} className="text-white pt-11" />
         </div>
 
         {/* Navigation Menu */}
@@ -105,8 +99,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
                 isCollapsed ? "justify-center" : "space-x-3"
               } ${
                 location.pathname === item.path 
-                  ? "bg-gray-100 text-[#343dea]" 
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "bg-blue-800 text-white" 
+                  : "text-gray-100 hover:bg-blue-800"
               }`}
             >
               <item.icon className="h-5 w-5" />
@@ -117,13 +111,13 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
 
         {/* Logout Button */}
         <div className="p-4">
-          <Button
-            variant="ghost"
-            className={`w-full flex items-center ${
-              isCollapsed ? "justify-center" : "justify-start"
-            } text-gray-700 hover:bg-gray-100 hover:text-[#343dea]`}
-            onClick={() => setShowLogoutDialog(true)}
-          >
+        <Button
+          variant="ghost"
+          className={`w-full flex items-center ${
+            isCollapsed ? "justify-center" : "justify-start"
+          } text-gray-100 hover:bg-blue-800 hover:text-white`}
+          onClick={() => setShowLogoutDialog(true)}
+        >
             <LogOut className="h-5 w-5" />
             {!isCollapsed && <span className="ml-3">Logout</span>}
           </Button>
