@@ -48,8 +48,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedLayout />}>
               <Route index element={<VideoAnalysis />} />
-              <Route path="insights" element={<Insights />} />
-              <Route path="dashboard" element={<Index />} />
+              {/* <Route path="insights" element={<Insights />} />
+              <Route path="dashboard" element={<Index />} /> */}
               <Route path="account" element={<Account />} />
               <Route path="support" element={<Support />} />
             </Route>
