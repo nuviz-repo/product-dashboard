@@ -49,7 +49,7 @@ const Index = () => {
   
   // State to track open accordion sections
   const [openSections, setOpenSections] = useState<string[]>(
-    ["product-interaction"] // Initially the first one is open
+    ["product-impressions"] // Initially the first one is open
   );
 
   if (error) {

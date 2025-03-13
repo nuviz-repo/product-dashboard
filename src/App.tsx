@@ -47,9 +47,9 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedLayout />}>
-              <Route index element={<Index />} />
+              <Route index element={<VideoAnalysis />} />
               <Route path="insights" element={<Insights />} />
-              <Route path="video-analysis" element={<VideoAnalysis />} />
+              <Route path="dashboard" element={<Index />} />
               <Route path="account" element={<Account />} />
               <Route path="support" element={<Support />} />
             </Route>

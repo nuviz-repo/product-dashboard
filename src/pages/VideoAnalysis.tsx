@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Play, Pause, Maximize } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { 
   Table, 
@@ -50,6 +51,7 @@ const VideoWithThumbnail = ({
   }) => {
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
     const videoRef = React.useRef<HTMLVideoElement>(null);
+    const videoContainerRef = React.useRef<HTMLDivElement>(null);
     
     // Generate thumbnail from first frame
     const generateThumbnail = () => {
@@ -69,6 +71,39 @@ const VideoWithThumbnail = ({
         setThumbnailUrl(thumbnailDataUrl);
       }
     };
+
+    // Custom play/pause functionality
+    const [isPlaying, setIsPlaying] = useState(false);
+    
+    const togglePlayPause = (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent triggering the onClick of the parent div
+      
+      if (videoRef.current) {
+        if (isPlaying) {
+          videoRef.current.pause();
+        } else {
+          videoRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
+      }
+    };
+    
+    // Custom fullscreen functionality
+    const toggleFullScreen = (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent triggering the onClick of the parent div
+      
+      if (!videoContainerRef.current) return;
+      
+      try {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          videoContainerRef.current.requestFullscreen();
+        }
+      } catch (error) {
+        console.error('Fullscreen error:', error);
+      }
+    };
     
     return (
       <div
@@ -80,13 +115,40 @@ const VideoWithThumbnail = ({
         onClick={onClick}
       >
         {isSelected ? (
-          <video 
-            ref={videoRef}
-            src={video.video_url} 
-            controls 
-            className="w-full h-full object-contain"
-            onLoadedData={generateThumbnail}
-          />
+          <div ref={videoContainerRef} className="relative w-full h-full">
+            <video 
+              ref={videoRef}
+              src={video.video_url} 
+              muted
+              playsInline
+              disablePictureInPicture
+              controlsList="nodownload nofullscreen noremoteplayback noplaybackrate"
+              className="w-full h-full object-contain"
+              onLoadedData={generateThumbnail}
+              onEnded={() => setIsPlaying(false)}
+            />
+            {/* Custom controls overlay */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2 flex justify-between"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                className="text-white p-2 rounded hover:bg-gray-700 focus:outline-none"
+                onClick={togglePlayPause}
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+              </button>
+              
+              <button 
+                className="text-white p-2 rounded hover:bg-gray-700 focus:outline-none"
+                onClick={toggleFullScreen}
+                aria-label="Fullscreen"
+              >
+                <Maximize size={20} />
+              </button>
+            </div>
+          </div>
         ) : (
           <div 
             className="w-full h-full relative"

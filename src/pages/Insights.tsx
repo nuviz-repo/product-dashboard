@@ -61,7 +61,7 @@ const Insights = () => {
           Chat with our AI assistant to analyze your product metrics and get detailed insights.
         </p>
       </div>
-      <div className="flex-1 min-h-0"> {/* This ensures the chat container doesn't overflow */}
+      <div className="flex-1 min-h-0">
         <ChatComponent
           impressions={timelineData.impressionsTimeline}
           visualizations={timelineData.visualizationsTimeline}

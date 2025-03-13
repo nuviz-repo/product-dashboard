@@ -233,7 +233,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
   if (isInline) {
     return (
-      <div className={`flex flex-col border rounded-lg bg-white shadow-lg ${className}`}>
+      <div className={`flex flex-col border rounded-md bg-white shadow-lg overflow-hidden ${className}`}>
         <div className="flex-none p-4 border-b bg-gray-50">
           <h2 className="text-lg font-semibold">Product Analytics Assistant</h2>
         </div>

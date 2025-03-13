@@ -15,12 +15,6 @@ import TimeChart from "./TimeChart";
 
 export const TIMELINE_SECTIONS = [
     {
-      id: 'product-interaction',
-      title: 'Average Pick-Up Duration (in seconds)',
-      dataKey: 'pickUpTimeline',
-      tooltip: 'The average time a customer holds a product after picking it up, calculated by dividing the total holding duration by the number of pick-ups.'
-    },
-    {
       id: 'product-impressions',
       title: 'Product Impressions Timeline (# of times)',
       dataKey: 'impressionsTimeline',
@@ -31,6 +25,12 @@ export const TIMELINE_SECTIONS = [
       title: 'Average Visualization Duration (in seconds)',
       dataKey: 'visualizationsTimeline',
       tooltip: 'The average time a customer visualizes a product before picking it up, calculated by dividing the total visualization duration by the number of people viewed the product.'
+    },
+    {
+      id: 'product-interaction',
+      title: 'Average Pick-Up Duration (in seconds)',
+      dataKey: 'pickUpTimeline',
+      tooltip: 'The average time a customer holds a product after picking it up, calculated by dividing the total holding duration by the number of pick-ups.'
     },
     {
       id: 'product-takeaway',

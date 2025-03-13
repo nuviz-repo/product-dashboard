@@ -37,8 +37,8 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     date: {
-      from: new Date(),
-      to: addDays(new Date(), 1),
+      from: new Date("2025-01-27T00:00:00"),
+      to: new Date("2025-02-03T00:00:00"),
     },
     selectedSkuNames: [],
     timelineData: null,
