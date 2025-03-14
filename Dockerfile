@@ -14,19 +14,23 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Use node to serve the application
-FROM node:18-alpine
+# Production stage with Nginx
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy the build output to replace the default nginx contents
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Install serve to run the application
-RUN npm install -g serve
+# Add custom Nginx configuration for single page applications
+RUN echo 'server { \
+    listen 8000; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
-# Copy build from the previous stage
-COPY --from=build /app/dist /app/dist
-
-# Expose the port that serve will use
+# Expose port 8000 to match Traefik configuration
 EXPOSE 8000
 
-# Command to run the application
-CMD ["serve", "-s", "dist", "-l", "8000"]
+CMD ["nginx", "-g", "daemon off;"]
