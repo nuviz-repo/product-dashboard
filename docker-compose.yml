@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    # Labels for Traefik if needed
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.react-app.rule=Host(`your-domain.com`)"
+    #   - "traefik.http.services.react-app.loadbalancer.server.port=3000"
+    restart: unless-stopped
