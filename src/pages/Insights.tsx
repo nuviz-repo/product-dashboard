@@ -31,7 +31,7 @@ const Insights = () => {
               </p>
               <div className="mt-4">
                 <button
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/dashboard')}
                   className="text-sm font-medium text-yellow-700 hover:text-yellow-600"
                 >
                   Go to Dashboard →

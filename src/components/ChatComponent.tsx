@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { MessageCircle, Send, TrendingUp, Search } from 'lucide-react';
 import {
   Dialog,
@@ -47,6 +47,33 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const scrollPosition = useRef(0);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const saveScrollPosition = () => {
+    if (chatContainerRef.current) {
+      scrollPosition.current = chatContainerRef.current.scrollTop;
+    }
+  };
+
+  const restoreScrollPosition = useCallback(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = scrollPosition.current;
+    }
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages, scrollToBottom]);
+
   const timelineData: TimelineDataForChat = {
     impressions: {
       name: impressionSectionData[0].title,
@@ -75,9 +102,99 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     } as BaseTimelineDataPerMetric
   };
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
+  // Function to auto-resize textarea based on content
+  const autoResizeTextarea = useCallback(() => {
+    if (inputRef.current) {
+      // Remember scroll position
+      const scrollTop = inputRef.current.scrollTop;
+      
+      // Reset height to auto to get the correct scrollHeight
+      inputRef.current.style.height = 'auto';
+      
+      // Calculate new height (capped at 150px max height)
+      const newHeight = Math.min(inputRef.current.scrollHeight, 150);
+      
+      // Set the new height
+      inputRef.current.style.height = `${newHeight}px`;
+      
+      // Restore scroll position
+      inputRef.current.scrollTop = scrollTop;
+      
+      // Check if we've reached max height
+      return newHeight >= 150;
+    }
+    return false;
   }, []);
+
+  // Function to scroll textarea to cursor position
+  const scrollTextareaToPosition = useCallback((position: number) => {
+    if (!inputRef.current) return;
+    
+    // Create a dummy div with the same styling as the textarea
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.visibility = 'hidden';
+    div.style.height = 'auto';
+    div.style.width = inputRef.current.clientWidth + 'px';
+    div.style.fontSize = window.getComputedStyle(inputRef.current).fontSize;
+    div.style.padding = window.getComputedStyle(inputRef.current).padding;
+    div.style.lineHeight = window.getComputedStyle(inputRef.current).lineHeight;
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.wordBreak = 'break-word';
+    div.style.overflowWrap = 'break-word';
+    
+    // Get text up to the cursor
+    const text = inputRef.current.value.substring(0, position);
+    div.textContent = text;
+    
+    // Append the div to the body to calculate its height
+    document.body.appendChild(div);
+    const cursorTop = div.offsetHeight;
+    document.body.removeChild(div);
+    
+    // Calculate if cursor is out of view
+    const scrollTop = inputRef.current.scrollTop;
+    const textareaHeight = inputRef.current.clientHeight;
+    
+    // If cursor is below view, scroll down
+    if (cursorTop > scrollTop + textareaHeight - 20) { // 20px padding
+      inputRef.current.scrollTop = cursorTop - textareaHeight + 20;
+    }
+    // If cursor is above view, scroll up
+    else if (cursorTop < scrollTop) {
+      inputRef.current.scrollTop = cursorTop;
+    }
+  }, []);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const cursorPosition = e.target.selectionStart;
+    
+    // Save chat scroll position
+    saveScrollPosition();
+    
+    setInput(e.target.value);
+    
+    // Use requestAnimationFrame to ensure DOM update happens before handling cursor
+    requestAnimationFrame(() => {
+      if (inputRef.current && cursorPosition !== null) {
+        // Set cursor position
+        inputRef.current.selectionStart = cursorPosition;
+        inputRef.current.selectionEnd = cursorPosition;
+        inputRef.current.focus();
+        
+        // First resize the textarea (auto-resize happens in the effect, but we need it here too for immediate feedback)
+        const isAtMaxHeight = autoResizeTextarea();
+        
+        // Only scroll to cursor if we're at max height
+        if (isAtMaxHeight) {
+          scrollTextareaToPosition(cursorPosition);
+        }
+      }
+      
+      // Restore chat container scroll position
+      restoreScrollPosition();
+    });
+  }, [restoreScrollPosition, scrollTextareaToPosition, autoResizeTextarea]);
 
   const handleSuggestionClick = async (prompt: string) => {
     setIsLoading(true);
@@ -103,12 +220,46 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     }
   };
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    saveScrollPosition();
+    
+    // Add new line on Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      
+      const cursorPosition = e.currentTarget.selectionStart;
+      const newValue = input.substring(0, cursorPosition) + '\n' + input.substring(cursorPosition);
+      
+      setInput(newValue);
+      
+      // Position cursor after the newly inserted line break
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          const newCursorPosition = cursorPosition + 1;
+          inputRef.current.selectionStart = newCursorPosition;
+          inputRef.current.selectionEnd = newCursorPosition;
+          inputRef.current.focus();
+          
+          // First resize the textarea
+          const isAtMaxHeight = autoResizeTextarea();
+          
+          // Only scroll to cursor if we're at max height
+          if (isAtMaxHeight) {
+            scrollTextareaToPosition(newCursorPosition);
+          }
+        }
+        restoreScrollPosition();
+      });
+    }
+  }, [input, restoreScrollPosition, scrollTextareaToPosition, autoResizeTextarea]);
+
   const handleSend = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       const userMessage = input.trim();
       setInput('');
       setIsLoading(true);
+      saveScrollPosition();
 
       try {
         if (chatMessages.length === 0) {
@@ -145,9 +296,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
         ]);
       } finally {
         setIsLoading(false);
+        setTimeout(scrollToBottom, 0);
       }
     }
-  }, [input, isLoading, chatMessages, timelineData, dailyMetric, setChatMessages]);
+  }, [input, isLoading, chatMessages, timelineData, dailyMetric, setChatMessages, scrollToBottom]);
 
   const SuggestionsView = () => (
     <div className="flex flex-col space-y-4 p-4">
@@ -170,7 +322,11 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
   const ChatContent = () => (
     <>
-      <div className="flex-1 overflow-y-auto">
+      <div 
+        className="flex-1 overflow-y-auto" 
+        ref={chatContainerRef}
+        onScroll={() => saveScrollPosition()}
+      >
         {chatMessages.length === 0 ? (
           <SuggestionsView />
         ) : (
@@ -208,14 +364,17 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
       <div className="flex-none border-t bg-white">
         <form onSubmit={handleSend} className="flex items-center gap-2 p-4">
-          <input
-            type="text"
+          <textarea
+            rows={1}
             value={input}
             onChange={handleInputChange}
-            placeholder="Ask about your product metrics..."
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Ask about your product metrics... (Cmd+Enter for new line)"
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto"
+            style={{ minHeight: '40px', maxHeight: '150px' }}
             disabled={isLoading}
             autoFocus
+            ref={inputRef}
+            onKeyDown={handleKeyDown}
           />
           <button
             type="submit"

@@ -32,16 +32,16 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
       icon: Video,
       path: '/',
     },
-    // {
-    //   title: 'Dashboard',
-    //   icon: LayoutDashboard,
-    //   path: '/dashboard',
-    // },
-    // {
-    //   title: 'Insights',
-    //   icon: Lightbulb,
-    //   path: '/insights',
-    // },
+    {
+      title: 'Dashboard',
+      icon: LayoutDashboard,
+      path: '/dashboard',
+    },
+    {
+      title: 'Insights',
+      icon: Lightbulb,
+      path: '/insights',
+    },
     {
       title: 'Account',
       icon: User,

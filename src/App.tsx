@@ -8,7 +8,7 @@ import { DashboardProvider } from "./contexts/DashboardContext";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Insights from "./pages/Insights";
+import Insights from "./pages/Insights";  
 import VideoAnalysis from "./pages/VideoAnalysis";
 import Account from "./pages/Account";
 import Support from "./pages/Support";
@@ -48,8 +48,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<ProtectedLayout />}>
               <Route index element={<VideoAnalysis />} />
-              {/* <Route path="insights" element={<Insights />} />
-              <Route path="dashboard" element={<Index />} /> */}
+              <Route path="insights" element={<Insights />} />
+              <Route path="dashboard" element={<Index />} />
               <Route path="account" element={<Account />} />
               <Route path="support" element={<Support />} />
             </Route>
