@@ -102,35 +102,26 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     } as BaseTimelineDataPerMetric
   };
 
-  // Function to auto-resize textarea based on content
   const autoResizeTextarea = useCallback(() => {
     if (inputRef.current) {
-      // Remember scroll position
       const scrollTop = inputRef.current.scrollTop;
       
-      // Reset height to auto to get the correct scrollHeight
       inputRef.current.style.height = 'auto';
       
-      // Calculate new height (capped at 150px max height)
       const newHeight = Math.min(inputRef.current.scrollHeight, 150);
       
-      // Set the new height
       inputRef.current.style.height = `${newHeight}px`;
       
-      // Restore scroll position
       inputRef.current.scrollTop = scrollTop;
       
-      // Check if we've reached max height
       return newHeight >= 150;
     }
     return false;
   }, []);
 
-  // Function to scroll textarea to cursor position
   const scrollTextareaToPosition = useCallback((position: number) => {
     if (!inputRef.current) return;
     
-    // Create a dummy div with the same styling as the textarea
     const div = document.createElement('div');
     div.style.position = 'absolute';
     div.style.visibility = 'hidden';
@@ -143,24 +134,19 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     div.style.wordBreak = 'break-word';
     div.style.overflowWrap = 'break-word';
     
-    // Get text up to the cursor
     const text = inputRef.current.value.substring(0, position);
     div.textContent = text;
     
-    // Append the div to the body to calculate its height
     document.body.appendChild(div);
     const cursorTop = div.offsetHeight;
     document.body.removeChild(div);
     
-    // Calculate if cursor is out of view
     const scrollTop = inputRef.current.scrollTop;
     const textareaHeight = inputRef.current.clientHeight;
     
-    // If cursor is below view, scroll down
-    if (cursorTop > scrollTop + textareaHeight - 20) { // 20px padding
+    if (cursorTop > scrollTop + textareaHeight - 20) {
       inputRef.current.scrollTop = cursorTop - textareaHeight + 20;
     }
-    // If cursor is above view, scroll up
     else if (cursorTop < scrollTop) {
       inputRef.current.scrollTop = cursorTop;
     }
@@ -169,29 +155,23 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const cursorPosition = e.target.selectionStart;
     
-    // Save chat scroll position
     saveScrollPosition();
     
     setInput(e.target.value);
     
-    // Use requestAnimationFrame to ensure DOM update happens before handling cursor
     requestAnimationFrame(() => {
       if (inputRef.current && cursorPosition !== null) {
-        // Set cursor position
         inputRef.current.selectionStart = cursorPosition;
         inputRef.current.selectionEnd = cursorPosition;
         inputRef.current.focus();
         
-        // First resize the textarea (auto-resize happens in the effect, but we need it here too for immediate feedback)
         const isAtMaxHeight = autoResizeTextarea();
         
-        // Only scroll to cursor if we're at max height
         if (isAtMaxHeight) {
           scrollTextareaToPosition(cursorPosition);
         }
       }
       
-      // Restore chat container scroll position
       restoreScrollPosition();
     });
   }, [restoreScrollPosition, scrollTextareaToPosition, autoResizeTextarea]);
@@ -223,7 +203,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     saveScrollPosition();
     
-    // Add new line on Command+Enter (Mac) or Ctrl+Enter (Windows/Linux)
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       
@@ -232,7 +211,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       
       setInput(newValue);
       
-      // Position cursor after the newly inserted line break
       requestAnimationFrame(() => {
         if (inputRef.current) {
           const newCursorPosition = cursorPosition + 1;
@@ -240,10 +218,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
           inputRef.current.selectionEnd = newCursorPosition;
           inputRef.current.focus();
           
-          // First resize the textarea
           const isAtMaxHeight = autoResizeTextarea();
           
-          // Only scroll to cursor if we're at max height
           if (isAtMaxHeight) {
             scrollTextareaToPosition(newCursorPosition);
           }

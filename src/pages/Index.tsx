@@ -15,10 +15,17 @@ import WelcomePopup from "@/components/WelcomePopup";
 const Index = () => {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   
-  // Show popup when component mounts
   useEffect(() => {
-    setShowWelcomePopup(true);
+    const hasSeenDashboardPopup = localStorage.getItem('hasSeenDashboardPopup');
+    if (!hasSeenDashboardPopup) {
+      setShowWelcomePopup(true);
+    }
   }, []);
+  
+  const handleClosePopup = () => {
+    localStorage.setItem('hasSeenDashboardPopup', 'true');
+    setShowWelcomePopup(false);
+  };
 
   const { 
     dashboardState: { date, selectedSkuNames },
@@ -77,7 +84,7 @@ const Index = () => {
         the key metrics that will be shared with future clients. 
         For more details, please contact the founders"
         isOpen={showWelcomePopup}
-        onClose={() => setShowWelcomePopup(false)}
+        onClose={handleClosePopup}
       />
       
       <div className="max-w-7xl mx-auto space-y-8">

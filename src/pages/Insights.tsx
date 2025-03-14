@@ -7,10 +7,19 @@ import WelcomePopup from '@/components/WelcomePopup';
 const Insights = () => {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   
-  // Show popup when component mounts
+  // Only show popup first time
   useEffect(() => {
-    setShowWelcomePopup(true);
+    const hasSeenInsightsPopup = localStorage.getItem('hasSeenInsightsPopup');
+    if (!hasSeenInsightsPopup) {
+      setShowWelcomePopup(true);
+    }
   }, []);
+  
+  // Handler to close popup and record that user has seen it
+  const handleClosePopup = () => {
+    localStorage.setItem('hasSeenInsightsPopup', 'true');
+    setShowWelcomePopup(false);
+  };
   
   const { dashboardState: { timelineData, dailyMetricData } } = useDashboard();
   const navigate = useNavigate();
@@ -52,7 +61,7 @@ const Insights = () => {
         showcasing the functionality that will be available to our clients once 
         we accumulate a relevant volume of data. For more details, please contact the founders."
         isOpen={showWelcomePopup}
-        onClose={() => setShowWelcomePopup(false)}
+        onClose={handleClosePopup}
       />
       
       <div className="flex-none">
